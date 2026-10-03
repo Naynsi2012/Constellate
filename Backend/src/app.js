@@ -6,23 +6,27 @@ const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors({
+app.use(
+  cors({
     origin: config.FRONTEND_URL,
     methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true
-}))
+    credentials: true,
+  }),
+);
 
 app.get("/", (req, res) => {
-    if (config.isDevelopment){
-        return res.send("Server is running on development");
-    }
-    res.send("Server is running on production");
-});
+  if (config.isDevelopment) {
+    return res.status(200).json({
+      status: "ok",
+      environment: "development",
+      message: "Server is running on development",
+    });
+  }
 
-app.get("/health", (req, res) => {
   res.status(200).json({
     status: "ok",
-    message: "API is healthy",
+    environment: "production",
+    message: "Server is running on production",
   });
 });
 
