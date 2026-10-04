@@ -3,7 +3,7 @@ import { socket } from "../../../lib/socket";
 import { getColor, getHostToken, getUserId } from "../../../lib/identity";
 
 export function useRoomSession(roomId, name) {
-  const [status, setStatus] = useState("idle");
+  const [status, setStatus] = useState("idle"); // idle | connecting | joined | error
   const [error, setError] = useState(null);
   const [you, setYou] = useState(null);
   const [room, setRoom] = useState(null);
@@ -27,7 +27,7 @@ export function useRoomSession(roomId, name) {
         },
         (res) => {
           if (!res?.ok) {
-            setError(res?.error ?? "COuld not join the room");
+            setError(res?.error ?? "Could not join the room");
             setStatus("error");
             return;
           }
@@ -43,18 +43,22 @@ export function useRoomSession(roomId, name) {
     }
 
     const onNoteCreated = (note) => setNotes((prev) => ({ ...prev, [note.id]: note }));
+
     const onNoteChanged = (change) =>
-      setNotes(
+      setNotes((prev) =>
         prev[change.id]
           ? { ...prev, [change.id]: { ...prev[change.id], ...change } }
           : prev,
       );
+
     const onNoteDeleted = ({ id }) =>
       setNotes((prev) => {
         const { [id]: _removed, ...rest } = prev;
         return rest;
       });
+
     const onPresenceJoin = ({ userId, name, color }) => setPeople((prev) => ({ ...prev, [userId]: { name, color } }));
+
     const onDisconnect = () => setStatus("connecting");
 
     socket.on("connect", join);
