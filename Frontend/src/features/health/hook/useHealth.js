@@ -10,10 +10,9 @@ export function useHealth() {
     const fetchApiHealth = async () => {
       try {
         const response = await checkServer();
-        console.log(response)
         setHealth(response.data.message);
       } catch (error) {
-        setError(error);
+        setError(error.message);
       } finally {
         setLoading(false);
       }
