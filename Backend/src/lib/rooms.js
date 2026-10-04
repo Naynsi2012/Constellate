@@ -22,6 +22,7 @@ export function createNewRoom({ question = "" }) {
     voteBudget: 5,
     participants: {},
     notes: {},
+    edges: {}, // arrows between notes: edgeId -> { id, source, target, authorId }
     clusters: {},
     votes: {},
   };

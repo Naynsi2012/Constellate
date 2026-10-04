@@ -10,19 +10,20 @@ const Board = () => {
   const { roomId } = useParams();
   const [name, setName] = useState(getName());
   const session = useRoomSession(roomId, name);
-  const { status, error, you, room, people, notes } = session;
+  const { status, error, you, room, people, notes, edges } = session;
 
   useEffect(() => {
-    if (status === "error" && /not found/i.test(error ?? "")) removeHostToken(roomId);
+    if (status === "error" && /not found/i.test(error ?? ""))
+      removeHostToken(roomId);
   }, [status, error, roomId]);
 
   if (!name) {
     return (
       <NamePrompt
         roomId={roomId}
-        onSubmit={(choosen) => {
-          saveName(choosen);
-          setName(choosen);
+        onSubmit={(chosen) => {
+          saveName(chosen);
+          setName(chosen);
         }}
       />
     );
@@ -50,7 +51,7 @@ const Board = () => {
   if (!room || !you) {
     return (
       <main className="grid h-screen place-items-center bg-slate-950 text-slate-100">
-        <p className="opacity-70">Connecting...</p>
+        <p className="opacity-70">Connecting…</p>
       </main>
     );
   }
@@ -70,10 +71,13 @@ const Board = () => {
           room={room}
           people={people}
           notes={notes}
+          edges={edges}
           createNote={session.createNote}
           moveNote={session.moveNote}
           updateNote={session.updateNote}
           deleteNote={session.deleteNote}
+          createEdge={session.createEdge}
+          deleteEdge={session.deleteEdge}
         />
       </div>
     </div>
