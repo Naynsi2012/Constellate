@@ -1,10 +1,13 @@
 import { config } from "./config/config.js";
 import express from "express";
-import cors from "cors";
+import cors from "cors"; 
+
+// Routes
+import roomRouter from "./routes/room.routes.js"
 
 const app = express();
 
-app.use(express.json());
+app.use(express.json({ limit: "10kb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
@@ -29,5 +32,7 @@ app.get("/", (req, res) => {
     message: "Server is running on production",
   });
 });
+
+app.use("/api/rooms", roomRouter);
 
 export default app;

@@ -1,35 +1,28 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
+import { useRoom } from "../features/rooms/hooks/useRoom";
+import { getName } from "../lib/identity";
 
 export default function LandingPage() {
   const navigate = useNavigate();
-  const [name, setName] = useState(localStorage.getItem("name") ?? "");
+  const { loading, error, handleCreateRoom } = useRoom();
+
+  const [name, setName] = useState(getName());
   const [question, setQuestion] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState("");
 
-  async function createRoom(e) {
-    e.preventDefault();
-    setBusy(true);
-    setError("");
-    try {
-      const roomId = `${name}+bitch`;
-      const hostToken = `${name}+host`;
+  async function handleSubmit(event) {
+    event.preventDefault();
+    if (!name.trim()) return;
 
-      localStorage.setItem("name", name.trim());
-      localStorage.setItem(`host:${roomId}`, hostToken);
-      navigate(`/room/${roomId}`);
-    } catch (err) {
-      setError(err.message);
-      setBusy(false);
-    }
+    const roomId = await handleCreateRoom({ name, question });
+    if (roomId) navigate(`/room/${roomId}`);
   }
 
   return (
     <main className="max-w-120 my-16 mx-auto py-0 px-4">
       <h1>Constellate</h1>
       <p>Start a brainstorm and share the link.</p>
-      <form onSubmit={createRoom}>
+      <form onSubmit={handleSubmit}>
         <input
           placeholder="Your name"
           value={name}
@@ -41,7 +34,9 @@ export default function LandingPage() {
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
         />
-        <button disabled={busy}>{busy ? "Creating…" : "Create room"}</button>
+        <button disabled={loading}>
+          {loading ? "Creating…" : "Create room"}
+        </button>
       </form>
       {error && <p role="alert">{error}</p>}
     </main>

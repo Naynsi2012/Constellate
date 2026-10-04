@@ -2,6 +2,7 @@ import { Link, useParams } from "react-router";
 
 const Results = () => {
   const { roomId } = useParams();
+  console.log(roomId)
 
   return (
     <main className="p-4">
