@@ -6,6 +6,7 @@ import RouteError from "../pages/RouteError";
 import Board from "../pages/Board";
 import Results from "../pages/Results";
 import NotFound from "../pages/NotFound";
+import SocketTestPage from "../features/socket/pages/SocketTestPage";
 
 function AppLayout() {
   return <Outlet />;
@@ -17,7 +18,7 @@ export const router = createBrowserRouter([
     element: <AppLayout />,
     errorElement: <RouteError />,
     children: [
-      { index: true, element: <LandingPage /> },
+      { index: true, element: <SocketTestPage /> },
       { path: "/health", element: <Health /> },
       { path: "/room/:roomId", element: <Board /> },
       { path: "/room/:roodId/results", element: <Results /> },
