@@ -25,3 +25,8 @@ export const saveName = (name) => localStorage.setItem("name", name.trim());
 
 export const getHostToken = (roomId) => localStorage.getItem(`host:${roomId}`) ?? undefined;
 export const saveHostToken = (roomId, token) => localStorage.setItem(`host:${roomId}`, token);
+export const removeHostToken = (roomId) => localStorage.removeItem(`host:${roomId}`);
+
+export function getHostedRoomIds() {
+  return Object.keys(localStorage).filter((key) => key.startsWith("host:")).map((key) => key.slice("host:".length));
+}
