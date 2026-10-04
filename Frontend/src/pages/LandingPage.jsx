@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { useRoom } from "../features/rooms/hooks/useRoom";
-import { getName } from "../lib/identity";
+import { getHostedRoomIds, getName } from "../lib/identity";
 
 export default function LandingPage() {
   const navigate = useNavigate();
@@ -9,6 +9,8 @@ export default function LandingPage() {
 
   const [name, setName] = useState(getName());
   const [question, setQuestion] = useState("");
+
+  const hostedRooms = getHostedRoomIds();
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -39,6 +41,19 @@ export default function LandingPage() {
         </button>
       </form>
       {error && <p role="alert">{error}</p>}
+
+      {hostedRooms.length > 0 && (
+        <section className="mt-8">
+          <h2>Your rooms</h2>
+          <ul>
+            {hostedRooms.map((roomId) => (
+              <li key={roomId}>
+                <Link to={`/room/${roomId}`}>{roomId}</Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
     </main>
   );
 }
