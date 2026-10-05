@@ -4,6 +4,10 @@ import { Server } from "socket.io";
 import app from "./src/app.js";
 import { config } from "./src/config/config.js";
 import { registerRoomHandlers } from "./src/sockets/room.handlers.js";
+import { loadPersistedRooms, allRooms } from "./src/lib/rooms.js";
+import { flushAll } from "./src/lib/persistence.js";
+
+loadPersistedRooms();
 
 const httpServer = createServer(app);
 
@@ -28,3 +32,11 @@ io.on("connection", (socket) => {
 httpServer.listen(config.PORT, () => {
   console.log(`Server is running on PORT: ${config.PORT}`);
 });
+
+// Flush pending room saves so no mutation is lost on shutdown
+for (const signal of ["SIGINT", "SIGTERM"]) {
+  process.on(signal, () => {
+    flushAll(allRooms());
+    process.exit(0);
+  });
+}

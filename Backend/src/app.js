@@ -1,9 +1,9 @@
 import { config } from "./config/config.js";
 import express from "express";
-import cors from "cors"; 
+import cors from "cors";
 
 // Routes
-import roomRouter from "./routes/room.routes.js"
+import roomRouter from "./routes/room.routes.js";
 
 const app = express();
 
@@ -17,19 +17,19 @@ app.use(
   }),
 );
 
-app.get("/", (req, res) => {
-  if (config.isDevelopment) {
-    return res.status(200).json({
-      status: "ok",
-      environment: "development",
-      message: "Server is running on development",
-    });
-  }
-
+// Simple health check used by the frontend's status page and uptime probes
+app.get("/health", (req, res) => {
   res.status(200).json({
     status: "ok",
-    environment: "production",
-    message: "Server is running on production",
+    message: "API is healthy",
+  });
+});
+
+app.get("/", (req, res) => {
+  res.status(200).json({
+    status: "ok",
+    environment: config.isDevelopment ? "development" : "production",
+    message: `Server is running on ${config.isDevelopment ? "development" : "production"}`,
   });
 });
 
