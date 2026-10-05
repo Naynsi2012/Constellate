@@ -5,8 +5,8 @@ const RouteError = () => {
   console.error(error);
 
   return (
-    <main className="max-w-120 my-16 mx-auto py-0 px-4">
-      <h2>Somethign went wrong</h2>
+    <main className="mx-auto my-16 max-w-120 px-4 py-0">
+      <h2>Something went wrong</h2>
       <p>{error?.statusText || error?.message || "Unexpected error"}</p>
       <Link to="/">Back to start</Link>
     </main>
