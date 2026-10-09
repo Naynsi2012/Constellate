@@ -296,7 +296,7 @@ const Board = () => {
 
   if (status === "error") {
     return (
-      <main className="grid h-screen place-items-center bg-slate-950 px-4 text-slate-100">
+      <main className="grid h-dvh place-items-center bg-slate-950 px-4 text-slate-100">
         <div className="max-w-sm text-center">
           <h1 className="mb-2 text-xl font-semibold">
             Couldn't join this room
@@ -315,14 +315,14 @@ const Board = () => {
 
   if (!room || !you) {
     return (
-      <main className="grid h-screen place-items-center bg-slate-950 text-slate-100">
+      <main className="grid h-dvh place-items-center bg-slate-950 text-slate-100">
         <p className="opacity-70">Connecting…</p>
       </main>
     );
   }
 
   return (
-    <div className="flex h-screen flex-col bg-slate-950 text-slate-100">
+    <div className="flex h-dvh flex-col overflow-hidden bg-slate-950 text-slate-100">
       <RoomHeader
         roomId={roomId}
         room={room}
