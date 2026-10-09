@@ -16,7 +16,7 @@ export function useRoomSession(roomId, name) {
   const [notes, setNotes] = useState({});
   const [edges, setEdges] = useState({});
   const [clusters, setClusters] = useState({});
-  const [votes, setVotes] = useState([]);
+  const [votes, setVotes] = useState({ perNote: {}, perCluster: {}, mine: [] });
   const [people, setPeople] = useState({});
   const [cursors, setCursors] = useState({});
   const [toasts, setToasts] = useState([]);
@@ -65,7 +65,7 @@ export function useRoomSession(roomId, name) {
     [],
   );
 
-  // A rejected command tells the user why (unless the caller handles it quietly).
+  // A rejected command tells the user why (unless the caller handles it quietly)
   const checked = useCallback(
     async (event, payload, { silent = false } = {}) => {
       const res = await send(event, payload);
@@ -93,7 +93,12 @@ export function useRoomSession(roomId, name) {
       setNotes(notes ?? {});
       setEdges(edges ?? {});
       setClusters(clusters ?? {});
-      setVotes(votes ?? []);
+
+      setVotes({
+        perNote: votes?.perNote ?? {},
+        perCluster: votes?.perCluster ?? {},
+        mine: Array.isArray(votes?.mine) ? votes.mine : [],
+      });
       setPeople(participants ?? {});
     };
 
@@ -136,9 +141,12 @@ export function useRoomSession(roomId, name) {
         return rest;
       });
       setEdges((prev) => withoutEdgesOf(prev, id));
-      setVotes((prev) =>
-        prev.filter((v) => !(v.targetType === "note" && v.targetId === id)),
-      );
+      setVotes((prev) => ({
+        ...prev,
+        mine: prev.mine.filter(
+          (v) => !(v.targetType === "note" && v.targetId === id),
+        ),
+      }));
     };
 
     const onEdgeCreated = (edge) =>
@@ -147,6 +155,15 @@ export function useRoomSession(roomId, name) {
       setEdges((prev) => {
         const { [id]: _removed, ...rest } = prev;
         return rest;
+      });
+    const onEdgeUpdated = ({ id, bend }) =>
+      setEdges((prev) => {
+        const edge = prev[id];
+        if (!edge) return prev;
+        const next = { ...edge };
+        if (bend === undefined) delete next.bend;
+        else next.bend = bend;
+        return { ...prev, [id]: next };
       });
 
     const onClusterCreated = (cluster) =>
@@ -189,14 +206,27 @@ export function useRoomSession(roomId, name) {
         }
         return next;
       });
-      setVotes((prev) =>
-        prev.filter((v) => !(v.targetType === "cluster" && v.targetId === id)),
-      );
+      setVotes((prev) => ({
+        ...prev,
+        mine: prev.mine.filter(
+          (v) => !(v.targetType === "note" && v.targetId === id),
+        ),
+      }));
     };
 
-    const onVoteAdded = (vote) => setVotes((prev) => [...prev, vote]);
-    const onVoteRemoved = ({ id }) =>
-      setVotes((prev) => prev.filter((v) => v.id !== id));
+    const onVoteAdded = ({ perNote, perCluster } = {}) =>
+      setVotes((prev) => ({
+        ...prev,
+        perNote: perNote ?? {},
+        perCluster: perCluster ?? {},
+      }));
+
+    const onVoteRemoved = ({ perNote, perCluster } = {}) =>
+      setVotes((prev) => ({
+        ...prev,
+        perNote: perNote ?? {},
+        perCluster: perCluster ?? {},
+      }));
 
     const onSettings = ({ voteBudget }) =>
       setRoom((prev) =>
@@ -247,6 +277,7 @@ export function useRoomSession(roomId, name) {
     socket.on(EV.NOTE_DELETED, onNoteDeleted);
     socket.on(EV.EDGE_CREATED, onEdgeCreated);
     socket.on(EV.EDGE_DELETED, onEdgeDeleted);
+    socket.on(EV.EDGE_UPDATED, onEdgeUpdated);
     socket.on(EV.CLUSTER_CREATED, onClusterCreated);
     socket.on(EV.CLUSTER_UPDATED, onClusterUpdated);
     socket.on(EV.CLUSTER_MOVED, onClusterMoved);
@@ -273,6 +304,7 @@ export function useRoomSession(roomId, name) {
       socket.off(EV.NOTE_DELETED, onNoteDeleted);
       socket.off(EV.EDGE_CREATED, onEdgeCreated);
       socket.off(EV.EDGE_DELETED, onEdgeDeleted);
+      socket.off(EV.EDGE_UPDATED, onEdgeUpdated);
       socket.off(EV.CLUSTER_CREATED, onClusterCreated);
       socket.off(EV.CLUSTER_UPDATED, onClusterUpdated);
       socket.off(EV.CLUSTER_MOVED, onClusterMoved);
@@ -317,7 +349,7 @@ export function useRoomSession(roomId, name) {
     if (!entry) return;
     const res = await entry.undo();
     if (res?.ok === false) {
-      undoStack.current.push(entry); // server rejected — put it back
+      undoStack.current.push(entry); // server rejected then put it back
       return;
     }
     redoStack.current.push(entry);
@@ -553,7 +585,30 @@ export function useRoomSession(roomId, name) {
       }
       return res;
     },
-    [checked, record], 
+    [checked, record],
+  );
+
+  const updateEdge = useCallback(
+    async (id, bend) => {
+      const before = edgesRef.current[id];
+      if (!before) return { ok: false, error: "arrow not found" };
+
+      setEdges((prev) => {
+        const edge = prev[id];
+        if (!edge) return prev;
+        const next = { ...edge };
+        if (bend === undefined) delete next.bend;
+        else next.bend = bend;
+        return { ...prev, [id]: next };
+      });
+
+      const res = await checked(EV.EDGE_UPDATE, { id, bend }, { silent: true });
+      if (!res.ok) {
+        setEdges((prev) => (prev[id] ? { ...prev, [id]: before } : prev));
+      }
+      return res;
+    },
+    [checked],
   );
 
   // clusters
@@ -638,7 +693,8 @@ export function useRoomSession(roomId, name) {
   const addVote = useCallback(
     async (targetId, targetType = "note") => {
       const res = await checked(EV.VOTE_ADD, { targetId, targetType });
-      if (res.ok) setVotes((prev) => [...prev, res.vote]);
+      if (res.ok)
+        setVotes((prev) => ({ ...prev, mine: [...prev.mine, res.vote] }));
       return res;
     },
     [checked],
@@ -647,7 +703,11 @@ export function useRoomSession(roomId, name) {
   const removeVote = useCallback(
     async (targetId) => {
       const res = await checked(EV.VOTE_REMOVE, { targetId }, { silent: true });
-      if (res.ok) setVotes((prev) => prev.filter((v) => v.id !== res.vote.id));
+      if (res.ok)
+        setVotes((prev) => ({
+          ...prev,
+          mine: prev.mine.filter((v) => v.id !== res.vote.id),
+        }));
       return res;
     },
     [checked],
@@ -701,6 +761,7 @@ export function useRoomSession(roomId, name) {
     deleteNote,
     createEdge,
     deleteEdge,
+    updateEdge,
     createCluster,
     updateCluster,
     moveCluster,
