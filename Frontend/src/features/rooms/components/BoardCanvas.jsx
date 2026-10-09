@@ -9,6 +9,7 @@ import {
   Rect,
   Text,
 } from "react-konva";
+import Konva from "konva";
 import NoteShape from "../canvas/NoteShape";
 import ClusterShape from "../canvas/ClusterShape";
 import Minimap from "../canvas/Minimap";
@@ -30,6 +31,7 @@ import ConnectorShape, {
   quadControl,
 } from "../canvas/ConnectorShape";
 
+Konva.hitOnDragEnabled = true;
 const ACTIVE = "#818cf8";
 const DRAG_SEND_MS = 60; // while dragging tell the others about every 60ms not every pixels
 const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
@@ -689,7 +691,7 @@ export default function BoardCanvas({
   return (
     <div
       ref={containerRef}
-      className="relative h-full min-h-0 w-full min-w-0 flex-1 overflow-hidden bg-slate-950"
+      className="relative h-full min-h-0 w-full min-w-0 flex-1 touch-none overflow-hidden bg-slate-950"
     >
       <Stage
         ref={stageRef}
@@ -713,6 +715,7 @@ export default function BoardCanvas({
         onMouseDown={handleStageMouseDown}
         onMouseUp={handleStageMouseUp}
         onDblClick={handleDoubleClick}
+        onDblTap={handleDoubleClick}
         onTouchMove={handleTouchMove}
         onTouchEnd={() => {
           pinch.current = { dist: 0, center: null };
@@ -977,7 +980,7 @@ export default function BoardCanvas({
       )}
 
       {/* hint */}
-      <div className="panel pointer-events-none absolute left-3 top-3 z-10 max-w-64 px-3 py-1.5 text-xs text-dim">
+      <div className="panel pointer-events-none absolute left-3 top-3 z-10 hidden max-w-64 px-3 py-1.5 text-xs text-dim sm:block">
         {phase === "converge"
           ? "Click a note or cluster to drop a dot. Right-click takes one back."
           : phase === "cluster"
