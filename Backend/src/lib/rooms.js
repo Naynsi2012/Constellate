@@ -57,7 +57,7 @@ export function createNewRoom({ question = "" }) {
     roomId,
     hostToken: randomBytes(16).toString("hex"),
     question: String(question).slice(0, 200),
-    phase: "diverge",
+    phase: "lobby",
     settings: {
       silentMode: true,
       voteBudget: 5,
