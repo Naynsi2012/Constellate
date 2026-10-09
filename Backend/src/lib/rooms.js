@@ -1,5 +1,5 @@
 import { randomBytes, randomInt } from "node:crypto";
-import { loadRoomsFromDisk, scheduleSave } from "./persistence.js";
+import { loadRoomsFromDisk, scheduleSave, deleteRoomFile } from "./persistence.js";
 
 const ALPHABET = "abcdefghijklmnopqrstuvwxyz123456789";
 
@@ -120,6 +120,25 @@ export function loadPersistedRooms() {
 
 export function allRooms() {
   return rooms.values();
+}
+
+export function cleanupExpiredRooms(ttlMs){
+  const now = Date.now();
+  let removed = 0;
+
+  for (const room of [...rooms.values()]){
+    const lastActive = room.lastActivityAt ?? room.createdAt ?? 0;
+    const someoneOnline = Object.keys(room.participants ?? {}).length > 0;
+
+    if (!someoneOnline && now - lastActive > ttlMs){
+      rooms.delete(room.roomId);
+      deleteRoomFile(room.roomId);
+      removed++;
+    }
+  }
+
+  if (removed > 0) console.log(`Cleaned up ${removed} expired room`);
+  return removed;
 }
 
 // During silent Diverge, other participants must not receive the real authorId

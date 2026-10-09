@@ -83,10 +83,15 @@ On Windows Command Prompt, use `copy .env.example .env` instead of `cp`.
 Open `Backend/.env` and update the values if needed:
 
 ```dotenv
+# Required
 FRONTEND_URL=http://localhost:5173
 PORT=3000
 NODE_ENV=development
-# Optional: ROOM_DATA_DIR=data/rooms
+
+# Optional
+DATA_DIR=./data/rooms
+ROOM_TTL=3d
+ROOM_CLEANUP_INTERVAL=1h
 ```
 
 ### 3. Start the backend
