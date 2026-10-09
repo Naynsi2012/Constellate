@@ -682,12 +682,13 @@ export function registerRoomHandlers(io, socket) {
         return deny(reply, "FORBIDDEN", "Only the host can change the phase");
       if (!PHASES.includes(p.phase))
         return deny(reply, "BAD_INPUT", "Unknown phase");
-      const index = PHASES.indexOf(room.phase);
-      if (p.phase !== PHASES[index + 1]) {
+
+      const step = PHASES.indexOf(p.phase) - PHASES.indexOf(room.phase);
+      if (Math.abs(step) !== 1) {
         return deny(
           reply,
           "BAD_TRANSITION",
-          "Phases must advance one step at a time",
+          "Phases can only move one step forward or back",
         );
       }
 
