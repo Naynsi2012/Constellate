@@ -14,12 +14,27 @@ function useTimerDisplay(timer) {
     timer.running && timer.endsAt
       ? Math.max(0, Math.ceil((timer.endsAt - Date.now()) / 1000))
       : timer.remaining;
-  const mm = String(Math.floor(remaining / 60)).padStart(2, "0");
-  const ss = String(remaining % 60).padStart(2, "0");
-  return `${mm}:${ss}`;
+  return `${String(Math.floor(remaining / 60)).padStart(2, "0")}:${String(remaining % 60).padStart(2, "0")}`;
 }
 
-// The Diverge → Cluster → Converge pipeline with host controls.
+function ClockIcon() {
+  return (
+    <svg
+      width="11"
+      height="11"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.4"
+      strokeLinecap="round"
+      aria-hidden
+    >
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3 2" />
+    </svg>
+  );
+}
+
 export default function PhaseBar({ room, you, session }) {
   const phase = room.phase;
   const index = PHASES.indexOf(phase);
@@ -32,48 +47,70 @@ export default function PhaseBar({ room, you, session }) {
   const prev = PHASES[index - 1];
 
   return (
-    <div className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-white/10 bg-slate-900/60 px-4 py-1.5 text-xs">
-      <ol className="flex items-center gap-1">
-        {PHASES.map((p, i) => (
-          <li key={p} className="flex items-center gap-1">
-            <span
-              className={`rounded-full px-2.5 py-0.5 font-semibold tracking-wide ${
-                i === index
-                  ? "bg-indigo-500/30 text-indigo-200 ring-1 ring-indigo-400/50"
-                  : i < index
-                    ? "text-emerald-300/80"
-                    : "text-slate-500"
-              }`}
-            >
-              {PHASE_LABELS[p].toUpperCase()}
-            </span>
-            {i < PHASES.length - 1 && <span className="text-slate-600">→</span>}
-          </li>
-        ))}
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-line bg-surface-1 px-3 py-2 text-xs backdrop-blur sm:px-4">
+      {/* stepper: numbers only on mobile, full labels on sm+ */}
+      <ol className="flex min-w-0 items-center gap-1 overflow-x-auto">
+        {PHASES.map((p, i) => {
+          const state = i < index ? "done" : i === index ? "active" : "todo";
+          return (
+            <li key={p} className="flex shrink-0 items-center gap-1">
+              <span
+                className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold tracking-wide ${
+                  state === "active"
+                    ? "border-accent/50 bg-accent-soft text-accent"
+                    : state === "done"
+                      ? "border-green/25 bg-green/10 text-green"
+                      : "border-line bg-surface-3 text-faint"
+                }`}
+              >
+                <span
+                  className={`grid size-3.5 place-items-center rounded-full text-[9px] ${
+                    state === "done"
+                      ? "bg-green/25 text-green"
+                      : state === "active"
+                        ? "bg-accent/25 text-accent"
+                        : "bg-surface-4 text-faint"
+                  }`}
+                >
+                  {state === "done" ? "✓" : i + 1}
+                </span>
+                <span className="hidden sm:inline">
+                  {PHASE_LABELS[p].toUpperCase()}
+                </span>
+              </span>
+              {i < PHASES.length - 1 && (
+                <span
+                  className={`h-px w-2 ${i < index ? "bg-green/40" : "bg-line"}`}
+                />
+              )}
+            </li>
+          );
+        })}
       </ol>
 
       {timerDisplay && (
         <span
-          className={`rounded px-2 py-0.5 font-mono ${
+          className={`chip font-mono tabular-nums ${
             room.settings.timer.running
-              ? "bg-amber-400/15 text-amber-300"
-              : "bg-white/10 text-slate-300"
+              ? "border-amber/30! bg-amber/10! text-amber!"
+              : ""
           }`}
           title="Session timer"
         >
-          ⏱ {timerDisplay}
+          <ClockIcon />
+          {timerDisplay}
         </span>
       )}
 
       {you.isHost && (
-        <div className="flex items-center gap-1.5">
+        <div className="ml-auto flex flex-wrap items-center gap-1.5">
           {prev && (
             <button
               type="button"
               onClick={() => session.setPhase(prev)}
-              className="rounded bg-white/10 px-2 py-0.5 hover:bg-white/20"
+              className="btn-ghost px-2.5! py-1! text-xs!"
             >
-              ‹ Back
+              Back
             </button>
           )}
           {next && (
@@ -81,9 +118,9 @@ export default function PhaseBar({ room, you, session }) {
               type="button"
               onClick={() => session.setPhase(next)}
               title="Ctrl/Cmd + Enter"
-              className="rounded bg-indigo-500 px-2 py-0.5 font-semibold text-white hover:bg-indigo-400"
+              className="btn-primary px-2.5! py-1! text-xs!"
             >
-              {PHASE_LABELS[next]} ›
+              {PHASE_LABELS[next]}
             </button>
           )}
 
@@ -94,20 +131,21 @@ export default function PhaseBar({ room, you, session }) {
                 setShowBudget((v) => !v);
                 setShowTimer(false);
               }}
-              className="rounded bg-white/10 px-2 py-0.5 hover:bg-white/20"
+              className="btn-ghost px-2.5! py-1! text-xs!"
               title="Vote dots per person"
             >
-              ● ×{room.settings?.voteBudget ?? 5}
+              Dots {"\u00D7"}{room.settings?.voteBudget ?? 5}
             </button>
             {showBudget && (
-              <div className="absolute left-0 top-7 z-30 flex items-center gap-2 rounded-lg border border-white/15 bg-slate-900 p-2 shadow-xl">
-                <span className="text-slate-300">Dots per person</span>
+              <div className="panel absolute left-0 top-9 z-30 flex items-center gap-2 p-3">
+                <span className="text-xs text-dim">Dots per person</span>
                 <input
                   type="number"
                   min={1}
                   max={25}
                   defaultValue={room.settings?.voteBudget ?? 5}
-                  className="w-14 rounded bg-white/10 px-1.5 py-0.5 text-slate-100"
+                  autoFocus
+                  className="input w-16! px-2! py-1! text-xs!"
                   onKeyDown={(e) => {
                     e.stopPropagation();
                     if (e.key === "Enter") {
@@ -133,13 +171,13 @@ export default function PhaseBar({ room, you, session }) {
                 setShowTimer((v) => !v);
                 setShowBudget(false);
               }}
-              className="rounded bg-white/10 px-2 py-0.5 hover:bg-white/20"
+              className="btn-ghost px-2.5! py-1! text-xs!"
             >
               Timer
             </button>
             {showTimer && (
-              <div className="absolute left-0 top-7 z-30 flex flex-col gap-2 rounded-lg border border-white/15 bg-slate-900 p-2 shadow-xl">
-                <label className="flex items-center gap-2 text-slate-300">
+              <div className="panel absolute right-0 top-9 z-30 flex w-44 flex-col gap-3 p-3">
+                <label className="flex items-center justify-between gap-2 text-xs text-dim">
                   Minutes
                   <input
                     type="number"
@@ -148,13 +186,13 @@ export default function PhaseBar({ room, you, session }) {
                     value={minutes}
                     onChange={(e) => setMinutes(Number(e.target.value))}
                     onKeyDown={(e) => e.stopPropagation()}
-                    className="w-14 rounded bg-white/10 px-1.5 py-0.5 text-slate-100"
+                    className="input w-16! px-2! py-1! text-xs!"
                   />
                 </label>
-                <div className="flex gap-1">
+                <div className="flex gap-1.5">
                   <button
                     type="button"
-                    className="rounded bg-emerald-600 px-2 py-0.5 text-white hover:bg-emerald-500"
+                    className="btn-primary flex-1 px-2! py-1! text-xs!"
                     onClick={() => {
                       session.timerStart(Math.round(minutes * 60));
                       setShowTimer(false);
@@ -164,7 +202,7 @@ export default function PhaseBar({ room, you, session }) {
                   </button>
                   <button
                     type="button"
-                    className="rounded bg-white/10 px-2 py-0.5 hover:bg-white/20"
+                    className="btn-ghost px-2! py-1! text-xs!"
                     onClick={() => {
                       session.timerPause();
                       setShowTimer(false);
@@ -174,7 +212,7 @@ export default function PhaseBar({ room, you, session }) {
                   </button>
                   <button
                     type="button"
-                    className="rounded bg-white/10 px-2 py-0.5 hover:bg-white/20"
+                    className="btn-ghost px-2! py-1! text-xs!"
                     onClick={() => {
                       session.timerReset();
                       setShowTimer(false);

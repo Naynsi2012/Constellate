@@ -7,10 +7,10 @@ export default function Toasts({ toasts, onDismiss }) {
           key={toast.id}
           type="button"
           onClick={() => onDismiss(toast.id)}
-          className={`pointer-events-auto rounded-lg px-4 py-2 text-sm shadow-xl ${
+          className={`pointer-events-auto cursor-pointer rounded-lg border px-4 py-2 text-sm shadow-xl transition-colors ${
             toast.kind === "info"
-              ? "border border-indigo-400/40 bg-indigo-950/95 text-indigo-200"
-              : "border border-rose-400/40 bg-rose-950/95 text-rose-200"
+              ? "border-accent/40 bg-surface-2 text-accent"
+              : "border-danger/40 bg-surface-2 text-danger"
           }`}
         >
           {toast.message}
