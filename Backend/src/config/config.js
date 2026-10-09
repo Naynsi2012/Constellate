@@ -1,7 +1,11 @@
 import dotenv from "dotenv"
 dotenv.config();
 import path from "node:path";
-import { parseDuration } from "../lib/constants.js";
+import { 
+    DEFAULT_CLEANUP_INTERVAL,
+    DEFAULT_ROOM_TTL,
+    parseDuration 
+} from "../lib/constants.js";
 
 if (!process.env.PORT){
     throw new Error("PORT is not defined in environment variables");
