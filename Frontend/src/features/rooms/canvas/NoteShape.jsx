@@ -52,15 +52,15 @@ export default function NoteShape({
     fontSize: note.fontSize ?? 14,
   };
 
-  const fill = isQuestion ? "#1e2a4a" : note.color;
-  const textColor = isQuestion ? "#f8fafc" : "#0f172a";
+  const fill = isQuestion ? "#141d36" : note.color;
+  const textColor = isQuestion ? "#f1f5f9" : "#0f172a";
   const strokeColor = selected
-    ? "#ffffff"
+    ? "#8fb0ff"
     : glow > 0
-      ? `rgba(255, 209, 102, ${0.35 + glow * 0.65})`
+      ? `rgba(255, 209, 102, ${0.4 + glow * 0.6})`
       : isQuestion
-        ? "#ffd166"
-        : "rgba(0,0,0,0.15)";
+        ? "rgba(143, 176, 255, 0.55)"
+        : "rgba(15, 23, 42, 0.18)";
 
   return (
     <Group
@@ -129,24 +129,25 @@ export default function NoteShape({
         width={width}
         height={height}
         fill={fill}
-        cornerRadius={10}
+        cornerRadius={12}
         stroke={strokeColor}
         strokeWidth={selected ? 2 : isQuestion ? 1.5 : glow > 0 ? 1.5 : 1}
-        shadowColor={glow > 0 ? "#ffd166" : "black"}
-        shadowBlur={glow > 0 ? 6 + glow * 26 : 10}
-        shadowOpacity={glow > 0 ? 0.35 + glow * 0.6 : 0.35}
+        shadowColor={glow > 0 ? "#ffd166" : "#000000"}
+        shadowBlur={glow > 0 ? 8 + glow * 26 : 18}
+        shadowOpacity={glow > 0 ? 0.4 + glow * 0.55 : 0.3}
+        shadowOffsetY={6}
       />
 
       {isQuestion && (
         <Text
-          text="✦ SESSION QUESTION"
+          text="SESSION QUESTION"
           x={NOTE_PAD}
-          y={7}
+          y={8}
           width={width - NOTE_PAD * 2}
           fontSize={9}
           fontStyle="bold"
-          letterSpacing={1}
-          fill="#ffd166"
+          letterSpacing={1.5}
+          fill="#818cf8"
         />
       )}
 
@@ -176,14 +177,14 @@ export default function NoteShape({
 
       {/* vote badge */}
       {voteCount > 0 && (
-        <Group x={width - 4} y={-8}>
+        <Group x={width - 2} y={-9}>
           <Circle
             radius={12}
             fill="#ffd166"
             shadowColor="#ffd166"
-            shadowBlur={8 + glow * 20}
-            shadowOpacity={0.8}
-            stroke="#0f172a"
+            shadowBlur={10 + glow * 22}
+            shadowOpacity={0.85}
+            stroke="rgba(15, 23, 42, 0.6)"
             strokeWidth={1}
           />
           <Text
