@@ -689,7 +689,7 @@ export default function BoardCanvas({
   return (
     <div
       ref={containerRef}
-      className="relative h-full w-full overflow-hidden bg-slate-950 max-w-[calc(100vw-2rem)] flex-wrap"
+      className="relative h-full min-h-0 w-full min-w-0 flex-1 overflow-hidden bg-slate-950"
     >
       <Stage
         ref={stageRef}
@@ -851,7 +851,7 @@ export default function BoardCanvas({
                 />
               );
             }
-            
+
             return (
               <NoteShape
                 key={note.id}
@@ -991,7 +991,7 @@ export default function BoardCanvas({
           <button
             type="button"
             onClick={addNoteAtCenter}
-            className="btn-primary rounded-full! shadow-lg"
+            className="btn-primary rounded-full! shadow-lg px-2 text-sm"
           >
             Add note
           </button>
@@ -1000,7 +1000,7 @@ export default function BoardCanvas({
           <button
             type="button"
             onClick={createClusterAtCenter}
-            className="btn-ghost rounded-full! border-accent/40! bg-accent-soft! text-accent! shadow-lg hover:border-accent/60!"
+            className="btn-ghost rounded-full! border-accent/40! bg-accent-soft! text-accent! shadow-lg hover:border-accent/60! px-2 text-sm"
           >
             New cluster
           </button>

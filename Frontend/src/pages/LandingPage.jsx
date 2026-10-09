@@ -33,7 +33,7 @@ export default function LandingPage() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center px-4 py-16 sm:py-24">
+    <main className="flex min-h-screen flex-col items-center px-4 py-10 sm:py-16">
       <div className="w-full max-w-md">
         <div className="mb-8">
           <p className="text-xs font-semibold tracking-widest text-accent uppercase">
