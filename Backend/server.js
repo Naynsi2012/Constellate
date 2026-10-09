@@ -4,10 +4,13 @@ import { Server } from "socket.io";
 import app from "./src/app.js";
 import { config } from "./src/config/config.js";
 import { registerRoomHandlers } from "./src/sockets/room.handlers.js";
-import { loadPersistedRooms, allRooms } from "./src/lib/rooms.js";
+import { loadPersistedRooms, allRooms, cleanupExpiredRooms } from "./src/lib/rooms.js";
 import { flushAll } from "./src/lib/persistence.js";
 
 loadPersistedRooms();
+
+cleanupExpiredRooms(config.ROOM_TTL_MS);
+setInterval(() => cleanupExpiredRooms(config.ROOM_TTL_MS), config.CLEANUP_INTERVAL_MS).unref();
 
 const httpServer = createServer(app);
 
