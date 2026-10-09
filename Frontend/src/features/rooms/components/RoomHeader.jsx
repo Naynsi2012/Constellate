@@ -18,7 +18,7 @@ export default function RoomHeader({ roomId, room, you, people, status }) {
   const entries = Object.entries(people);
 
   return (
-    <header className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-line bg-surface-1 px-3 py-2 text-sm backdrop-blur sm:px-4">
+    <header className="relative z-20 flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-line bg-surface-1 px-3 py-2 text-sm backdrop-blur sm:px-4">
       <Link
         to="/"
         className="text-xs font-semibold tracking-widest text-accent uppercase"
@@ -26,7 +26,7 @@ export default function RoomHeader({ roomId, room, you, people, status }) {
         Constellate
       </Link>
 
-      <span className="max-w-3xs truncate text-dim" title={room.question}>
+      <span className="hidden max-w-3xs truncate text-dim sm:inline" title={room.question}>
         {room.question || "No session question yet"}
       </span>
 
@@ -98,7 +98,7 @@ export default function RoomHeader({ roomId, room, you, people, status }) {
         </Link>
         <Link
           to="/"
-          className="text-xs text-dim transition-colors hover:text-ink"
+          className="hidden text-xs text-dim transition-colors hover:text-ink sm:inline"
         >
           New room
         </Link>
