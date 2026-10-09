@@ -488,9 +488,12 @@ export function useRoomSession(roomId, name) {
         return rest;
       });
       setEdges((prev) => withoutEdgesOf(prev, id));
-      setVotes((prev) =>
-        prev.filter((v) => !(v.targetType === "note" && v.targetId === id)),
-      );
+      setVotes((prev) => ({
+        ...prev,
+        mine: prev.mine.filter(
+          (v) => !(v.targetType === "note" && v.targetId === id),
+        ),
+      }));
 
       const res = await checked(EV.NOTE_DELETE, { id });
       if (!res.ok) {
