@@ -27,6 +27,8 @@ export const SOCKET_EVENTS = {
   NOTE_DELETED: "note:deleted",
   EDGE_CREATED: "edge:created",
   EDGE_DELETED: "edge:deleted",
+  EDGE_UPDATE: "edge:update",
+  EDGE_UPDATED: "edge:updated",
   CLUSTER_CREATED: "cluster:created",
   CLUSTER_UPDATED: "cluster:updated",
   CLUSTER_MOVED: "cluster:moved",
@@ -40,9 +42,9 @@ export const SOCKET_EVENTS = {
   PRESENCE_LEAVE: "presence:leave",
 };
 
-export const PHASES = ["diverge", "cluster", "converge"];
-
+export const PHASES = ["lobby", "diverge", "cluster", "converge"];
 export const PHASE_LABELS = {
+  lobby: "Lobby",
   diverge: "Diverge",
   cluster: "Cluster",
   converge: "Converge",
