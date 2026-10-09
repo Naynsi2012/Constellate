@@ -3,9 +3,9 @@ import {
   Stage,
   Layer,
   Circle,
-  Arrow,
   Group,
   Line,
+  Path,
   Rect,
   Text,
 } from "react-konva";
@@ -22,10 +22,15 @@ import {
   canDeleteNote,
   canMoveNote,
   glowIntensity,
-  countVotes,
 } from "../canvas/constants";
-import { FONTS, NOTE_COLORS, FONT_SIZES, CLUSTER_COLORS } from "../noteStyles";
+import { FONTS, NOTE_COLORS, FONT_SIZES } from "../noteStyles";
+import ConnectorShape, {
+  headData,
+  quadCurveData,
+  quadControl,
+} from "../canvas/ConnectorShape";
 
+const ACTIVE = "#818cf8";
 const DRAG_SEND_MS = 60; // while dragging tell the others about every 60ms not every pixels
 const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
 
@@ -101,7 +106,7 @@ function NoteEditorOverlay({ note, view, onCommit, onCancel }) {
       ref={areaRef}
       value={draft}
       maxLength={500}
-      placeholder="Type an idea…"
+      placeholder="Type an idea"
       onChange={(e) => setDraft(e.target.value)}
       onBlur={() => onCommit(draft)}
       onKeyDown={(e) => {
@@ -115,7 +120,7 @@ function NoteEditorOverlay({ note, view, onCommit, onCancel }) {
           onCancel();
         }
       }}
-      className="absolute z-20 resize-none overflow-hidden rounded bg-transparent font-medium outline-none ring-2 ring-white/70"
+      className="absolute z-20 resize-none overflow-hidden rounded bg-transparent font-medium outline-none ring-2 ring-accent/60"
       style={{
         left,
         top,
@@ -136,6 +141,7 @@ function NoteToolbar({
   you,
   phase,
   myVotes,
+  viewportWidth,
   onStyleChange,
   onDelete,
   onVote,
@@ -145,7 +151,10 @@ function NoteToolbar({
   const canEdit = canEditNote(note, you, phase);
   const canDelete = canDeleteNote(note, you);
   const isQuestion = note.type === "question";
-  const left = note.x * view.scale + view.x;
+  const left = Math.max(
+    8,
+    Math.min(note.x * view.scale + view.x, viewportWidth - 380),
+  );
   const top = note.y * view.scale + view.y;
 
   const sizeIndex = Math.max(0, FONT_SIZES.indexOf(note.fontSize ?? 14));
@@ -153,18 +162,18 @@ function NoteToolbar({
   const bigger = FONT_SIZES[Math.min(FONT_SIZES.length - 1, sizeIndex + 1)];
 
   const btn =
-    "rounded bg-white/10 px-2 py-1 text-xs text-slate-100 hover:bg-white/25 disabled:opacity-40";
+    "rounded-lg bg-surface-4 px-2 py-1 text-xs text-ink transition-colors hover:bg-surface-5 disabled:opacity-40";
 
   return (
     <div
-      className="absolute z-20 flex -translate-y-full items-center gap-1 rounded-lg border border-white/15 bg-slate-900/95 px-2 py-1.5 shadow-xl backdrop-blur"
+      className="panel absolute z-20 flex -translate-y-full items-center gap-1 px-2 py-1.5 backdrop-blur"
       style={{ left, top: top - 8 }}
       onMouseDown={(e) => e.stopPropagation()}
     >
       {phase === "converge" && !isQuestion ? (
         <>
           <button type="button" className={btn} onClick={() => onVote(note.id)}>
-            + dot
+            Add dot
           </button>
           <button
             type="button"
@@ -172,7 +181,7 @@ function NoteToolbar({
             disabled={myVotes === 0}
             onClick={() => onRemoveVote(note.id)}
           >
-            − dot
+            Remove dot
           </button>
         </>
       ) : (
@@ -184,15 +193,15 @@ function NoteToolbar({
                   key={color}
                   type="button"
                   aria-label={`Colour ${color}`}
-                  className="size-4 rounded-full border border-black/40"
+                  className="size-4 cursor-pointer rounded-full border border-black/40 transition-transform hover:scale-110"
                   style={{ background: color }}
                   onClick={() => onStyleChange(note.id, { color })}
                 />
               ))}
-              <span className="mx-1 h-4 w-px bg-white/15" />
+              <span className="mx-1 h-4 w-px bg-line" />
               <select
                 aria-label="Font"
-                className="rounded bg-white/10 px-1 py-1 text-xs text-slate-100"
+                className="cursor-pointer rounded-lg border border-line bg-surface-3 px-1 py-1 text-xs text-ink outline-none"
                 value={note.fontFamily ?? "sans"}
                 onChange={(e) =>
                   onStyleChange(note.id, { fontFamily: e.target.value })
@@ -228,23 +237,23 @@ function NoteToolbar({
                 className={btn}
                 onClick={() => onLinkStart(note.id)}
               >
-                ↔
+                Link
               </button>
             </>
           )}
           {canEdit && isQuestion && (
-            <span className="px-1 text-xs text-slate-300">
-              Session question — double-click to edit
+            <span className="px-1 text-xs text-dim">
+              Session question. Double-click to edit.
             </span>
           )}
           {canDelete && (
             <button
               type="button"
               title="Delete note"
-              className={`${btn} text-rose-300`}
+              className={`${btn} text-danger! hover:bg-danger/15!`}
               onClick={() => onDelete(note.id)}
             >
-              ×
+              Delete
             </button>
           )}
         </>
@@ -285,18 +294,22 @@ export default function BoardCanvas({
   const semantic = view.scale < SEMANTIC_ZOOM_THRESHOLD;
   const hideAuthors = room.settings?.silentMode && phase === "diverge";
 
-  const { perNote, perCluster } = useMemo(() => countVotes(votes), [votes]);
+  const perNote = votes?.perNote ?? {};
+  const perCluster = votes?.perCluster ?? {};
+
   const maxVotes = useMemo(
     () => Math.max(1, ...Object.values(perNote), ...Object.values(perCluster)),
     [perNote, perCluster],
   );
+
   const myVotes = useMemo(() => {
     const mine = {};
-    for (const v of votes)
+    for (const v of votes.mine)
       if (v.userId === you.userId)
         mine[v.targetId] = (mine[v.targetId] ?? 0) + 1;
     return mine;
-  }, [votes, you.userId]);
+  }, [votes.mine]);
+
   const clusterMembers = useMemo(() => {
     const counts = {};
     for (const note of Object.values(notes)) {
@@ -526,7 +539,6 @@ export default function BoardCanvas({
 
   const handleStageMouseUp = useCallback(
     (e) => {
-      // Released over empty canvas while linking → cancel.
       if (linkSourceId && e.target === e.target.getStage()) {
         setLinkSourceId(null);
         setLinkPreview(null);
@@ -625,6 +637,17 @@ export default function BoardCanvas({
     [session],
   );
 
+  const lastBendSend = useRef(0);
+  const throttledBend = useCallback(
+    (id, bend) => {
+      const now = Date.now();
+      if (now - lastBendSend.current < 90) return;
+      lastBendSend.current = now;
+      session.updateEdge(id, bend);
+    },
+    [session],
+  );
+
   const completeLink = useCallback(
     (targetId) => {
       if (linkSourceId && linkSourceId !== targetId) {
@@ -652,21 +675,6 @@ export default function BoardCanvas({
   const linkSource = linkSourceId ? notes[linkSourceId] : null;
   const editingNote = editingId ? notes[editingId] : null;
 
-  const edgePoints = (edge) => {
-    const s = notes[edge.source];
-    const t = notes[edge.target];
-    const sh = heights[edge.source] ?? 80;
-    const th = heights[edge.target] ?? 80;
-    const sx = s.x + NOTE_WIDTH;
-    const sy = s.y + sh / 2;
-    const tx = t.x;
-    const ty = t.y + th / 2;
-
-    // If the target sits left of the source, attach to the opposite sides
-    if (tx < sx) return [s.x, sy, t.x + NOTE_WIDTH, ty];
-    return [sx, sy, tx, ty];
-  };
-
   const commitRename = () => {
     const name = renameDraft.trim();
     if (renamingClusterId && name)
@@ -681,7 +689,7 @@ export default function BoardCanvas({
   return (
     <div
       ref={containerRef}
-      className="relative h-full w-full overflow-hidden bg-slate-950"
+      className="relative h-full w-full overflow-hidden bg-slate-950 max-w-[calc(100vw-2rem)] flex-wrap"
     >
       <Stage
         ref={stageRef}
@@ -758,57 +766,63 @@ export default function BoardCanvas({
         {/* connectors */}
         {!semantic && (
           <Layer>
-            {edgeList.map((edge) => {
-              const points = edgePoints(edge);
-              const selected = selection.edgeId === edge.id;
-              return (
-                <Arrow
-                  key={edge.id}
-                  points={points}
-                  stroke={selected ? "#ffffff" : "#8ea2c9"}
-                  strokeWidth={selected ? 3 : 2}
-                  fill={selected ? "#ffffff" : "#8ea2c9"}
-                  pointerLength={9}
-                  pointerWidth={8}
-                  opacity={0.9}
-                  hitStrokeWidth={18}
-                  onClick={(e) => {
-                    e.cancelBubble = true;
-                    onSelect({ type: "edge", id: edge.id });
-                  }}
-                  onTap={(e) => {
-                    e.cancelBubble = true;
-                    onSelect({ type: "edge", id: edge.id });
-                  }}
-                  onMouseEnter={(e) => {
-                    const stage = e.target.getStage();
-                    if (stage) stage.container().style.cursor = "pointer";
-                  }}
-                  onMouseLeave={(e) => {
-                    const stage = e.target.getStage();
-                    if (stage) stage.container().style.cursor = "default";
-                  }}
-                />
-              );
-            })}
-
-            {/* connector preview while linking */}
-            {linkSource && linkPreview && (
-              <Arrow
-                points={[
-                  linkSource.x + NOTE_WIDTH,
-                  linkSource.y + (heights[linkSource.id] ?? 80) / 2,
-                  linkPreview.x,
-                  linkPreview.y,
-                ]}
-                stroke="#7aa2ff"
-                strokeWidth={2}
-                dash={[6, 4]}
-                fill="#7aa2ff"
-                pointerLength={9}
-                pointerWidth={8}
-                listening={false}
+            {edgeList.map((edge) => (
+              <ConnectorShape
+                key={edge.id}
+                edge={edge}
+                source={notes[edge.source]}
+                target={notes[edge.target]}
+                sourceHeight={heights[edge.source] ?? 80}
+                targetHeight={heights[edge.target] ?? 80}
+                selected={selection.edgeId === edge.id}
+                zoomScale={view.scale}
+                onSelect={(id) => onSelect({ type: "edge", id })}
+                onBend={throttledBend}
+                onBendEnd={(id, bend) => session.updateEdge(id, bend)}
               />
+            ))}
+
+            {linkSource && linkPreview && (
+              <>
+                <Path
+                  data={quadCurveData(
+                    {
+                      x: linkSource.x + NOTE_WIDTH,
+                      y: linkSource.y + (heights[linkSource.id] ?? 80) / 2,
+                    },
+                    quadControl(
+                      {
+                        x: linkSource.x + NOTE_WIDTH,
+                        y: linkSource.y + (heights[linkSource.id] ?? 80) / 2,
+                      },
+                      linkPreview,
+                    ),
+                    linkPreview,
+                  )}
+                  stroke={ACTIVE}
+                  strokeWidth={1.75 / view.scale}
+                  dash={[6 / view.scale, 4 / view.scale]}
+                  lineCap="round"
+                  listening={false}
+                  perfectDrawEnabled={false}
+                />
+                <Path
+                  data={headData(
+                    linkPreview,
+                    quadControl(
+                      {
+                        x: linkSource.x + NOTE_WIDTH,
+                        y: linkSource.y + (heights[linkSource.id] ?? 80) / 2,
+                      },
+                      linkPreview,
+                    ),
+                    1 / view.scale,
+                  )}
+                  fill={ACTIVE}
+                  listening={false}
+                  perfectDrawEnabled={false}
+                />
+              </>
             )}
           </Layer>
         )}
@@ -837,7 +851,7 @@ export default function BoardCanvas({
                 />
               );
             }
-            const isEditing = editingId === note.id;
+            
             return (
               <NoteShape
                 key={note.id}
@@ -934,6 +948,7 @@ export default function BoardCanvas({
           onVote={(id) => session.addVote(id, "note")}
           onRemoveVote={(id) => session.removeVote(id)}
           onLinkStart={(id) => setLinkSourceId(id)}
+          viewportWidth={size.width}
         />
       )}
 
@@ -949,7 +964,7 @@ export default function BoardCanvas({
             if (e.key === "Enter") commitRename();
             if (e.key === "Escape") setRenamingClusterId(null);
           }}
-          className="absolute z-20 rounded border border-white/30 bg-slate-900/95 px-2 py-1 text-sm font-semibold uppercase tracking-wider text-slate-100 outline-none"
+          className="absolute z-20 rounded-lg border border-line-strong bg-surface-2 px-2 py-1 text-sm font-semibold uppercase tracking-wider text-ink outline-none"
           style={{
             left: renamingCluster.x * view.scale + view.x + 14 * view.scale,
             top: renamingCluster.y * view.scale + view.y + 8 * view.scale,
@@ -962,9 +977,9 @@ export default function BoardCanvas({
       )}
 
       {/* hint */}
-      <div className="pointer-events-none absolute left-3 top-3 z-10 max-w-64 rounded bg-black/40 px-2 py-1 text-xs text-slate-300/80">
+      <div className="panel pointer-events-none absolute left-3 top-3 z-10 max-w-64 px-3 py-1.5 text-xs text-dim">
         {phase === "converge"
-          ? "Click a note or cluster to drop a dot. Right-click to take one back."
+          ? "Click a note or cluster to drop a dot. Right-click takes one back."
           : phase === "cluster"
             ? "Drag notes together. Double-click empty space for a note, or create a cluster below."
             : "Double-click to add a note. Drag the blue dot on a note to link it. N for a new note, Ctrl+K for commands."}
@@ -976,36 +991,36 @@ export default function BoardCanvas({
           <button
             type="button"
             onClick={addNoteAtCenter}
-            className="rounded-full bg-white px-4 py-2 text-sm font-medium text-slate-900 shadow-lg hover:bg-slate-200"
+            className="btn-primary rounded-full! shadow-lg"
           >
-            + Add note
+            Add note
           </button>
         )}
         {phase === "cluster" && (
           <button
             type="button"
             onClick={createClusterAtCenter}
-            className="rounded-full border border-indigo-300/60 bg-indigo-500/20 px-4 py-2 text-sm font-medium text-indigo-200 shadow-lg hover:bg-indigo-500/30"
+            className="btn-ghost rounded-full! border-accent/40! bg-accent-soft! text-accent! shadow-lg hover:border-accent/60!"
           >
             New cluster
           </button>
         )}
         {linkSourceId && (
-          <span className="rounded-full bg-indigo-500/80 px-4 py-2 text-sm text-white shadow-lg">
-            Click a target note to connect — Esc to cancel
+          <span className="chip px-4! py-2! text-ink! shadow-lg">
+            Click a target note to connect. Esc to cancel.
           </span>
         )}
       </div>
 
       {/* zoom controls */}
-      <div className="absolute bottom-4 right-3 z-10 flex flex-col gap-1">
+      <div className="panel absolute right-3 bottom-4 z-10 flex flex-col gap-0.5 p-1">
         <button
           type="button"
           aria-label="Zoom in"
           onClick={() =>
             zoomAt({ x: size.width / 2, y: size.height / 2 }, 1.25)
           }
-          className="grid size-8 place-items-center rounded bg-white/10 text-lg hover:bg-white/20"
+          className="grid size-8 place-items-center rounded-lg text-sm text-dim transition-colors hover:bg-surface-4 hover:text-ink"
         >
           +
         </button>
@@ -1013,18 +1028,18 @@ export default function BoardCanvas({
           type="button"
           aria-label="Zoom out"
           onClick={() => zoomAt({ x: size.width / 2, y: size.height / 2 }, 0.8)}
-          className="grid size-8 place-items-center rounded bg-white/10 text-lg hover:bg-white/20"
+          className="grid size-8 place-items-center rounded-lg text-sm text-dim transition-colors hover:bg-surface-4 hover:text-ink"
         >
-          −
+          -
         </button>
         <button
           type="button"
           aria-label="Fit board"
           onClick={fitView}
-          className="grid size-8 place-items-center rounded bg-white/10 text-xs hover:bg-white/20"
           title="Fit everything"
+          className="grid size-8 place-items-center rounded-lg text-[11px] font-medium text-dim transition-colors hover:bg-surface-4 hover:text-ink"
         >
-          ⤢
+          Fit
         </button>
       </div>
 
