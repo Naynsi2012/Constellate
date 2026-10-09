@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router";
-import { getResults, exportUrl } from "../features/rooms/api";
+import { getResults, downloadExport } from "../features/rooms/api";
 
 const Results = () => {
   const { roomId } = useParams();
@@ -149,13 +149,14 @@ const Results = () => {
         </section>
 
         <div className="mt-8 flex flex-wrap gap-3">
-          <a
-            href={exportUrl(roomId)}
-            download
+          <button
+            onClick={() =>
+              downloadExport(roomId).catch((e) => alert(e.message))
+            }
             className="rounded-lg bg-indigo-500 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-400"
           >
             Export Markdown
-          </a>
+          </button>
           <Link
             to={`/room/${roomId}`}
             className="rounded-lg bg-white/10 px-4 py-2 text-sm hover:bg-white/20"
