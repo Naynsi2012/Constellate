@@ -2,27 +2,49 @@ import { Circle, Path } from "react-konva";
 import { NOTE_WIDTH } from "./constants";
 
 function anchors(source, sourceHeight, target, targetHeight) {
-  const sy = source.y + sourceHeight / 2;
-  const ty = target.y + targetHeight / 2;
-  if (target.x + NOTE_WIDTH / 2 < source.x + NOTE_WIDTH / 2) {
-    return {
-      p0: { x: source.x, y: sy },
-      p1: { x: target.x + NOTE_WIDTH, y: ty },
-    };
+  const sc = { x: source.x + NOTE_WIDTH / 2, y: source.y + sourceHeight / 2 };
+  const tc = { x: target.x + NOTE_WIDTH / 2, y: target.y + targetHeight / 2 };
+  const dx = tc.x - sc.x;
+  const dy = tc.y - sc.y;
+
+  // Side-by-side notes connect left/right, stacked notes connect top/bottom
+  const horizontal =
+    Math.abs(dx) / NOTE_WIDTH >=
+    Math.abs(dy) / ((sourceHeight + targetHeight) / 2);
+
+  if (horizontal) {
+    return dx >= 0
+      ? {
+          p0: { x: source.x + NOTE_WIDTH, y: sc.y },
+          p1: { x: target.x, y: tc.y },
+        }
+      : {
+          p0: { x: source.x, y: sc.y },
+          p1: { x: target.x + NOTE_WIDTH, y: tc.y },
+        };
   }
-  return {
-    p0: { x: source.x + NOTE_WIDTH, y: sy },
-    p1: { x: target.x, y: ty },
-  };
+  return dy >= 0
+    ? {
+        p0: { x: sc.x, y: source.y + sourceHeight },
+        p1: { x: tc.x, y: target.y },
+      }
+    : {
+        p0: { x: sc.x, y: source.y },
+        p1: { x: tc.x, y: target.y + targetHeight },
+      };
 }
 
 function frame(p0, p1, bend) {
   const dx = p1.x - p0.x;
   const dy = p1.y - p0.y;
+
   const len = Math.hypot(dx, dy) || 1;
+
   const nx = -dy / len;
   const ny = dx / len;
-  const b = bend ?? -Math.min(56, Math.max(20, len * 0.15));
+  
+  const b = bend ?? 0;
+
   return {
     c1: { x: p0.x + dx / 3 + nx * b, y: p0.y + dy / 3 + ny * b },
     c2: { x: p0.x + (2 * dx) / 3 + nx * b, y: p0.y + (2 * dy) / 3 + ny * b },

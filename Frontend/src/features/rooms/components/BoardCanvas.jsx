@@ -144,6 +144,7 @@ function NoteToolbar({
   phase,
   myVotes,
   viewportWidth,
+  viewportHeight,
   onStyleChange,
   onDelete,
   onVote,
@@ -159,6 +160,17 @@ function NoteToolbar({
   );
   const top = note.y * view.scale + view.y;
 
+  const compact = viewportWidth < 640;
+
+  // On small screens the toolbar docks to the edge furthest from the note
+  // so it never covers the note being edited.
+  const dockAtTop = note.y * view.scale + view.y > viewportHeight / 2;
+  const style = compact
+    ? dockAtTop
+      ? { left: 8, right: 8, top: 8 }
+      : { left: 8, right: 68, bottom: 64 }
+    : { left, top: top - 8 };
+
   const sizeIndex = Math.max(0, FONT_SIZES.indexOf(note.fontSize ?? 14));
   const smaller = FONT_SIZES[Math.max(0, sizeIndex - 1)];
   const bigger = FONT_SIZES[Math.min(FONT_SIZES.length - 1, sizeIndex + 1)];
@@ -168,8 +180,10 @@ function NoteToolbar({
 
   return (
     <div
-      className="panel absolute z-20 flex -translate-y-full items-center gap-1 px-2 py-1.5 backdrop-blur"
-      style={{ left, top: top - 8 }}
+      className={`panel absolute z-20 flex items-center gap-1 px-2 py-1.5 backdrop-blur ${
+        compact ? "flex-wrap" : "-translate-y-full"
+      }`}
+      style={style}
       onMouseDown={(e) => e.stopPropagation()}
     >
       {phase === "converge" && !isQuestion ? (
@@ -882,7 +896,6 @@ export default function BoardCanvas({
                 onDragStartNote={noteDrag.onDragStartNote}
                 onDragMoveNote={noteDrag.onDragMoveNote}
                 onDragEndNote={noteDrag.onDragEndNote}
-                onLinkStart={(id) => setLinkSourceId(id)}
                 onLinkComplete={completeLink}
                 onHover={setHoveredId}
               />
@@ -921,6 +934,24 @@ export default function BoardCanvas({
         </Layer>
       </Stage>
 
+{linkSourceId && (
+  <div className="panel absolute left-3 top-3 z-30 flex max-w-[calc(100%-5rem)] items-center gap-2 py-1.5 pl-3 pr-1.5 text-xs text-ink shadow-lg">
+    <span>Select a note to connect to</span>
+    <button
+      type="button"
+      aria-label="Cancel linking"
+      title="Cancel (Esc)"
+      className="grid size-6 shrink-0 place-items-center rounded-lg text-dim transition-colors hover:bg-surface-4 hover:text-ink"
+      onClick={() => {
+        setLinkSourceId(null);
+        setLinkPreview(null);
+      }}
+    >
+      ✕
+    </button>
+  </div>
+)}
+
       {/* HTML overlays (editors, toolbars, HUD) */}
       {editingNote && (
         <NoteEditorOverlay
@@ -936,7 +967,7 @@ export default function BoardCanvas({
         />
       )}
 
-      {selectedNote && !editingId && (
+      {selectedNote && !editingId && !linkSourceId && (
         <NoteToolbar
           note={selectedNote}
           view={view}
@@ -952,6 +983,7 @@ export default function BoardCanvas({
           onRemoveVote={(id) => session.removeVote(id)}
           onLinkStart={(id) => setLinkSourceId(id)}
           viewportWidth={size.width}
+          viewportHeight={size.height}
         />
       )}
 
@@ -980,13 +1012,15 @@ export default function BoardCanvas({
       )}
 
       {/* hint */}
-      <div className="panel pointer-events-none absolute left-3 top-3 z-10 hidden max-w-64 px-3 py-1.5 text-xs text-dim sm:block">
+      {!linkSourceId && (
+       <div className="panel pointer-events-none absolute left-3 top-3 z-10 hidden max-w-64 px-3 py-1.5 text-xs text-dim sm:block">
         {phase === "converge"
           ? "Click a note or cluster to drop a dot. Right-click takes one back."
           : phase === "cluster"
             ? "Drag notes together. Double-click empty space for a note, or create a cluster below."
-            : "Double-click to add a note. Drag the blue dot on a note to link it. N for a new note, Ctrl+K for commands."}
+            : "Double-click to add a note. Select a note and press Link to connect it. N for a new note, Ctrl+K for commands."}
       </div>
+      )}
 
       {/* bottom-center actions */}
       <div className="absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 items-center gap-2">
@@ -1007,11 +1041,6 @@ export default function BoardCanvas({
           >
             New cluster
           </button>
-        )}
-        {linkSourceId && (
-          <span className="chip px-4! py-2! text-ink! shadow-lg">
-            Click a target note to connect. Esc to cancel.
-          </span>
         )}
       </div>
 

@@ -215,34 +215,6 @@ export default function NoteShape({
           ))}
         </Group>
       )}
-
-      {/* connector handle: drag or click to link this note to another */}
-      {(selected || hovered) && phase !== "converge" && !isQuestion && (
-        <Circle
-          x={width + 2}
-          y={height / 2}
-          radius={7}
-          fill="#7aa2ff"
-          stroke="#0f172a"
-          strokeWidth={1.5}
-          shadowColor="#7aa2ff"
-          shadowBlur={8}
-          onMouseDown={(e) => {
-            e.cancelBubble = true;
-            onLinkStart(note.id);
-          }}
-          onMouseUp={(e) => {
-            if (linkActive) {
-              e.cancelBubble = true;
-              onLinkComplete(note.id);
-            }
-          }}
-          onMouseEnter={(e) => {
-            const stage = e.target.getStage();
-            if (stage) stage.container().style.cursor = "crosshair";
-          }}
-        />
-      )}
     </Group>
   );
 }
