@@ -9,5 +9,5 @@ export const getResults = (roomId) => {
 };
 
 export const exportUrl = (roomId) => {
-  return `${import.meta.env.VITE_API_URL}/api/rooms/${roomId}/export`;
+  return `${import.meta.env.VITE_API_URL ?? ""}/api/rooms/${roomId}/export`;
 };

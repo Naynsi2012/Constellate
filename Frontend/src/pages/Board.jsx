@@ -82,7 +82,7 @@ const Board = () => {
 
   const exportMarkdown = useCallback(async () => {
     const res = await fetch(
-      `${import.meta.env.VITE_API_URL}/api/rooms/${roomId}/export`,
+      `${import.meta.env.VITE_API_URL ?? ""}/api/rooms/${roomId}/export`,
       { headers: { "x-host-token": getHostToken(roomId) ?? "" } },
     );
     if (!res.ok) return;
