@@ -9,7 +9,12 @@ import BoardCanvas from "../features/rooms/components/BoardCanvas";
 import CommandPalette from "../features/rooms/components/CommandPalette";
 import LobbyPrompt from "../features/rooms/components/LobbyPrompt";
 import Toasts from "../features/rooms/components/Toasts";
-import { getName, removeHostToken, saveName } from "../lib/identity";
+import {
+  getName,
+  getHostToken,
+  removeHostToken,
+  saveName,
+} from "../lib/identity";
 import { PHASES } from "../features/rooms/socket/events";
 
 const PAN_STEP = 80;
@@ -75,11 +80,19 @@ const Board = () => {
     if (next) session.setPhase(next);
   }, [room, you, session]);
 
-  const exportMarkdown = useCallback(() => {
-    window.open(
+  const exportMarkdown = useCallback(async () => {
+    const res = await fetch(
       `${import.meta.env.VITE_API_URL}/api/rooms/${roomId}/export`,
-      "_blank",
+      { headers: { "x-host-token": getHostToken(roomId) ?? "" } },
     );
+    if (!res.ok) return;
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `constellate-${roomId}-results.md`;
+    a.click();
+    URL.revokeObjectURL(url);
   }, [roomId]);
 
   useEffect(() => {
