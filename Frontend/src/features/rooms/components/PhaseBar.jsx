@@ -47,7 +47,7 @@ export default function PhaseBar({ room, you, session }) {
   const prev = PHASES[index - 1];
 
   return (
-    <div className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-line bg-surface-1 px-3 py-2 text-xs backdrop-blur sm:px-4">
+    <div className="relative z-20 flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-line bg-surface-1 px-3 py-2 text-xs backdrop-blur sm:px-4">
       {/* stepper: numbers only on mobile, full labels on sm+ */}
       <ol className="flex min-w-0 items-center gap-1 overflow-x-auto">
         {PHASES.map((p, i) => {
@@ -88,7 +88,9 @@ export default function PhaseBar({ room, you, session }) {
         })}
       </ol>
 
-      {timerDisplay && (
+            {timerDisplay &&
+        (room.settings.timer.running ||
+          room.settings.timer.remaining !== room.settings.timer.duration) && (
         <span
           className={`chip font-mono tabular-nums ${
             room.settings.timer.running
@@ -103,7 +105,7 @@ export default function PhaseBar({ room, you, session }) {
       )}
 
       {you.isHost && (
-        <div className="ml-auto flex flex-wrap items-center gap-1.5">
+        <div className="flex w-full flex-wrap items-center justify-end gap-1.5 sm:ml-auto sm:w-auto">
           {prev && (
             <button
               type="button"
@@ -137,7 +139,7 @@ export default function PhaseBar({ room, you, session }) {
               Dots {"\u00D7"}{room.settings?.voteBudget ?? 5}
             </button>
             {showBudget && (
-              <div className="panel absolute left-0 top-9 z-30 flex items-center gap-2 p-3">
+              <div className="panel absolute right-0 top-9 z-30 flex items-center gap-2 p-3 sm:left-0 sm:right-auto">
                 <span className="text-xs text-dim">Dots per person</span>
                 <input
                   type="number"
