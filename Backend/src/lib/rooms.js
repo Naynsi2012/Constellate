@@ -5,13 +5,13 @@ const ALPHABET = "abcdefghijklmnopqrstuvwxyz123456789";
 
 const rooms = new Map();
 
-export const PHASES = ["diverge", "cluster", "converge"];
+export const PHASES = ["lobby", "diverge", "cluster", "converge"];
 
-// What participants may do in each phase. The server enforces this, never the UI alone
 export const PHASE_RULES = {
-  diverge: { noteCreate: true, noteEdit: true, noteMove: "author", edges: true, clusters: false, vote: false },
-  cluster: { noteCreate: true, noteEdit: true, noteMove: "anyone", edges: true, clusters: true, vote: false },
-  converge: { noteCreate: false, noteEdit: false, noteMove: "none", edges: false, clusters: false, vote: true },
+  lobby:    { noteCreate: false, noteEdit: false, noteMove: "none", noteDelete: false, edges: false, clusters: false, vote: false },
+  diverge:  { noteCreate: true,  noteEdit: true,  noteMove: "author", noteDelete: true, edges: true, clusters: false, vote: false },
+  cluster:  { noteCreate: true,  noteEdit: true,  noteMove: "anyone", noteDelete: false, edges: true, clusters: true, vote: false },
+  converge: { noteCreate: false, noteEdit: false, noteMove: "none", noteDelete: false, edges: false, clusters: false, vote: true },
 };
 
 export const QUESTION_COLOR = "#1e2a4a";
@@ -88,16 +88,16 @@ export function getRoom(roomId) {
 
 // A room loaded from disk has nobody online and no running timer
 function sanitizeLoadedRoom(room) {
-  room.phase = PHASES.includes(room.phase) ? room.phase : "diverge";
+  room.phase = PHASES.includes(room.phase) ? room.phase : "lobby";
+  const savedTimer = room.settings?.timer ?? {};
+  const duration = Number.isFinite(savedTimer.duration) ? savedTimer.duration : 600;
   room.settings = {
     silentMode: room.settings?.silentMode !== false,
-    voteBudget: Number.isInteger(room.settings?.voteBudget) ? room.settings.voteBudget : 5,
-    timer: makeTimer(),
+    voteBudget: Number.isInteger(room.settings?.voteBudget)
+      ? room.settings.voteBudget
+      : 5,
+    timer: { duration, remaining: duration, running: false, endsAt: null },
   };
-  if (room.settings?.timer && Number.isFinite(room.settings.timer.duration)) {
-    room.settings.timer.duration = room.settings.timer.duration;
-    room.settings.timer.remaining = room.settings.timer.duration;
-  }
   room.participants = {};
   room.users = room.users ?? {};
   room.notes = room.notes ?? {};
@@ -125,10 +125,14 @@ export function allRooms() {
 // During silent Diverge, other participants must not receive the real authorId
 // The server keeps the real author internally; clients learn it when the phase moves on
 export function publicState(room, forUserId = null) {
-  const { hostToken, ...rest } = room;
+  const { hostToken, votes, ...rest } = room;
   const anonymous = room.settings.silentMode && room.phase === "diverge";
   return {
     ...rest,
+    votes: {
+      ...voteCounts(room),
+      mine: votes.filter((v) => v.userId === forUserId),
+    },
     notes: Object.fromEntries(
       Object.entries(room.notes).map(([id, note]) => [
         id,
