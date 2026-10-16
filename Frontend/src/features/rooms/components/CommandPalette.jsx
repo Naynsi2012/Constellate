@@ -92,7 +92,7 @@ export default function CommandPalette({ open, commands = [], onClose }) {
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-start justify-center overflow-y-auto bg-black/65 px-3 pb-5 pt-[max(1rem,7vh)] backdrop-blur-md sm:px-6 sm:pt-[12vh]"
+      className="fixed inset-0 z-100 flex items-start justify-center overflow-y-auto bg-black/65 px-3 pb-5 pt-[max(1rem,7vh)] backdrop-blur-md sm:px-6 sm:pt-[12vh]"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) onClose?.();
       }}
@@ -194,7 +194,7 @@ export default function CommandPalette({ open, commands = [], onClose }) {
                       : "text-dim hover:bg-surface-raised hover:text-ink"
                   }`}
                 >
-                  <span className="min-w-0 break-words font-medium">
+                  <span className="min-w-0 wrap-break-word font-medium">
                     {command.label}
                   </span>
 

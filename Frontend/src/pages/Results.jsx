@@ -81,7 +81,7 @@ function ErrorResults({ error, roomId }) {
         <h1 className="mt-2 text-xl font-semibold">
           Could not load results
         </h1>
-        <p className="mt-2 break-words text-sm leading-6 text-dim">
+        <p className="mt-2 wrap-break-word text-sm leading-6 text-dim">
           {error || "Something went wrong while loading this session."}
         </p>
 
@@ -285,7 +285,7 @@ export default function Results() {
             Session results
           </p>
 
-          <h1 className="mt-3 max-w-3xl break-words text-2xl font-semibold leading-tight tracking-tight text-ink sm:text-3xl lg:text-4xl">
+          <h1 className="mt-3 max-w-3xl wrap-break-word text-2xl font-semibold leading-tight tracking-tight text-ink sm:text-3xl lg:text-4xl">
             {results.question || `Room ${results.roomId || roomId}`}
           </h1>
 
@@ -390,7 +390,7 @@ export default function Results() {
                       </span>
 
                       <div className="min-w-0 flex-1">
-                        <h3 className="break-words text-sm font-semibold leading-6 text-ink sm:text-base">
+                        <h3 className="wrap-break-word text-sm font-semibold leading-6 text-ink sm:text-base">
                           {cluster.name || "Untitled cluster"}
                         </h3>
                         <p className="mt-1 text-xs text-dim">
@@ -456,7 +456,7 @@ export default function Results() {
                       <div className="flex flex-wrap items-start justify-between gap-3">
                         <div className="min-w-0 flex-1">
                           <p
-                            className="break-words text-sm font-medium leading-6 text-ink sm:text-base"
+                            className="wrap-break-word text-sm font-medium leading-6 text-ink sm:text-base"
                             style={{
                               overflowWrap: "anywhere",
                             }}
@@ -472,7 +472,7 @@ export default function Results() {
                             {note.cluster && (
                               <>
                                 <span aria-hidden="true">·</span>
-                                <span className="break-words text-dim">
+                                <span className="wrap-break-word text-dim">
                                   {note.cluster}
                                 </span>
                               </>

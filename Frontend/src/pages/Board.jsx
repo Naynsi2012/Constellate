@@ -457,9 +457,11 @@ const Board = () => {
       />
 
       {/* Desktop keeps the workflow visible; mobile accesses it in the drawer. */}
-      <div className="hidden shrink-0 md:block">
-        <PhaseBar room={room} you={you} session={session} />
-      </div>
+      {room.question && (
+        <div className="hidden shrink-0 md:block">
+          <PhaseBar room={room} you={you} session={session} />
+        </div>
+      )}
 
       <main className="relative min-h-0 min-w-0 flex-1 overflow-hidden">
         <BoardCanvas

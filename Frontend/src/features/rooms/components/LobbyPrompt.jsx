@@ -23,20 +23,13 @@ export default function LobbyPrompt({ isHost, onSubmit }) {
   return (
     <div className="absolute inset-0 z-40 grid place-items-center overflow-y-auto bg-canvas/85 px-4 py-8 backdrop-blur-md">
       <div className="w-full max-w-lg">
-        <div className="mb-5 flex items-center justify-center gap-2">
-          <LogoMark />
-          <span className="text-sm font-semibold tracking-tight text-ink">
-            Constellate
-          </span>
-        </div>
-
         {isHost ? (
           <form
             onSubmit={handleSubmit}
             className="overflow-hidden rounded-3xl border border-line bg-surface p-6 shadow-2xl shadow-black/30 sm:p-8"
           >
             <div className="mb-6">
-              <h2 className="mt-5 text-2xl font-semibold tracking-tight text-ink sm:text-3xl">
+              <h2 className="text-2xl font-semibold tracking-tight text-ink sm:text-3xl">
                 What problem are we solving?
               </h2>
 

@@ -224,7 +224,7 @@ export default function PhaseBar({ room, you, session, compact = false }) {
               type="button"
               aria-label="Close timer settings"
               onClick={() => setShowTimer(false)}
-              className="fixed inset-0 z-[119] cursor-default bg-black/30"
+              className="fixed inset-0 z-119 cursor-default bg-black/30"
             />
           )}
 
@@ -232,7 +232,7 @@ export default function PhaseBar({ room, you, session, compact = false }) {
             role="dialog"
             aria-modal={compact ? "true" : undefined}
             aria-labelledby={`${durationInputId}-title`}
-            className={`z-[120] flex w-[min(17rem,calc(100vw-2rem))] flex-col gap-3 rounded-xl border border-line bg-surface-raised p-3.5 shadow-2xl shadow-black/30 ${
+            className={`z-120 flex w-[min(17rem,calc(100vw-2rem))] flex-col gap-3 rounded-xl border border-line bg-surface-raised p-3.5 shadow-2xl shadow-black/30 ${
               compact
                 ? "fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
                 : "absolute right-0 top-full mt-2"
@@ -384,7 +384,7 @@ export default function PhaseBar({ room, you, session, compact = false }) {
       {isHost && (
         <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
           {phaseButtons}
-          <div className="w-[4.5rem] sm:w-24">{timerButton}</div>
+          <div className="w-18 sm:w-24">{timerButton}</div>
         </div>
       )}
     </div>

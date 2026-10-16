@@ -186,7 +186,7 @@ export default function RoomHeader({
 
   return (
     <>
-      <header className="relative z-40 flex h-12 shrink-0 items-center gap-2 border-b border-line bg-surface px-3 sm:h-[54px] sm:px-4 lg:px-5">
+      <header className="relative z-40 flex h-12 shrink-0 items-center gap-2 border-b border-line bg-surface px-3 sm:h-13.5 sm:px-4 lg:px-5">
         <Link
           to="/"
           onClick={() => setMenuOpen(false)}
@@ -281,7 +281,7 @@ export default function RoomHeader({
       </header>
 
       {menuOpen && (
-        <div className="fixed inset-0 z-[100] md:hidden">
+        <div className="fixed inset-0 z-100 md:hidden">
           <button
             type="button"
             aria-label="Close room menu"
@@ -296,7 +296,7 @@ export default function RoomHeader({
             aria-label="Room menu"
             className="absolute inset-y-0 right-0 flex w-[min(19rem,88vw)] flex-col overflow-hidden border-l border-line bg-surface shadow-2xl shadow-black/40"
           >
-            <div className="flex h-12 shrink-0 items-center gap-2 border-b border-line px-3 sm:h-[54px] sm:px-3.5">
+            <div className="flex h-12 shrink-0 items-center gap-2 border-b border-line px-3 sm:h-13.5 sm:px-3.5">
               <LogoMark />
 
               <div className="min-w-0 flex-1">

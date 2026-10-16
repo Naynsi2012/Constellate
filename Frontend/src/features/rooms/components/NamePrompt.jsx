@@ -11,7 +11,7 @@ export default function NamePrompt({ roomId, onSubmit }) {
 
   return (
     <main className="relative grid min-h-screen place-items-center overflow-hidden bg-canvas px-4 py-10">
-      <div className="pointer-events-none absolute left-1/2 top-1/2 size-[28rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/5 blur-3xl" />
+      <div className="pointer-events-none absolute left-1/2 top-1/2 size-112 -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/5 blur-3xl" />
 
       <div className="relative w-full max-w-md">
         <div className="mb-6 flex items-center justify-center gap-2.5">
