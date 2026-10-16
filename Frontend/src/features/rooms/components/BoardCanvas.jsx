@@ -79,7 +79,14 @@ function makeStars(count) {
 
 function NoteEditorOverlay({ note, view, onCommit, onCancel }) {
   const [draft, setDraft] = useState(note.text);
+  const committedRef = useRef(false);
   const areaRef = useRef(null);
+
+  const commitOnce = () => {
+    if (committedRef.current) return;
+    committedRef.current = true;
+    onCommit(draft);
+  };
 
   useEffect(() => {
     const area = areaRef.current;
@@ -110,13 +117,15 @@ function NoteEditorOverlay({ note, view, onCommit, onCancel }) {
       maxLength={500}
       placeholder="Type an idea"
       onChange={(e) => setDraft(e.target.value)}
-      onBlur={() => onCommit(draft)}
+      onBlur={commitOnce}
       onKeyDown={(e) => {
         e.stopPropagation();
+
         if (e.key === "Enter" && !e.shiftKey) {
           e.preventDefault();
-          onCommit(draft);
+          commitOnce();
         }
+
         if (e.key === "Escape") {
           e.preventDefault();
           onCancel();
@@ -176,11 +185,11 @@ function NoteToolbar({
   const bigger = FONT_SIZES[Math.min(FONT_SIZES.length - 1, sizeIndex + 1)];
 
   const btn =
-    "rounded-lg bg-surface-4 px-2 py-1 text-xs text-ink transition-colors hover:bg-surface-5 disabled:opacity-40";
+    "inline-flex min-h-9 shrink-0 items-center justify-center rounded-lg border border-line bg-surface-hover px-2.5 text-xs font-medium text-ink transition-colors hover:border-accent/30 hover:bg-accent/10 disabled:opacity-40 sm:min-h-8 sm:px-2";
 
   return (
     <div
-      className={`panel absolute z-20 flex items-center gap-1 px-2 py-1.5 backdrop-blur ${
+      className={`absolute z-20 flex max-w-[calc(100%-1rem)] items-center gap-1.5 rounded-2xl border border-line bg-surface-raised/95 p-2 shadow-xl shadow-black/20 backdrop-blur-xl ${
         compact ? "flex-wrap" : "-translate-y-full"
       }`}
       style={style}
@@ -289,8 +298,14 @@ export default function BoardCanvas({
   setLinkSourceId,
   canvasApiRef,
 }) {
-  const { room, notes, edges, clusters, votes, people, cursors } = session;
-  const phase = room.phase;
+  const room = session?.room ?? {};
+  const notes = session?.notes ?? {};
+  const edges = session?.edges ?? {};
+  const clusters = session?.clusters ?? {};
+  const votes = session?.votes ?? {};
+  const people = session?.people ?? {};
+  const cursors = session?.cursors ?? {};
+  const phase = room.phase ?? "diverge";
 
   const containerRef = useRef(null);
   const stageRef = useRef(null);
@@ -310,8 +325,13 @@ export default function BoardCanvas({
   const semantic = view.scale < SEMANTIC_ZOOM_THRESHOLD;
   const hideAuthors = room.settings?.silentMode && phase === "diverge";
 
-  const perNote = votes?.perNote ?? {};
-  const perCluster = votes?.perCluster ?? {};
+  const perNote =
+    votes?.perNote && typeof votes.perNote === "object" ? votes.perNote : {};
+
+  const perCluster =
+    votes?.perCluster && typeof votes.perCluster === "object"
+      ? votes.perCluster
+      : {};
 
   const maxVotes = useMemo(
     () => Math.max(1, ...Object.values(perNote), ...Object.values(perCluster)),
@@ -320,11 +340,15 @@ export default function BoardCanvas({
 
   const myVotes = useMemo(() => {
     const mine = {};
-    for (const v of votes.mine)
-      if (v.userId === you.userId)
-        mine[v.targetId] = (mine[v.targetId] ?? 0) + 1;
+
+    for (const vote of votes?.mine ?? []) {
+      if (vote.userId === you?.userId) {
+        mine[vote.targetId] = (mine[vote.targetId] ?? 0) + 1;
+      }
+    }
+
     return mine;
-  }, [votes.mine]);
+  }, [votes?.mine, you?.userId]);
 
   const clusterMembers = useMemo(() => {
     const counts = {};
@@ -705,7 +729,7 @@ export default function BoardCanvas({
   return (
     <div
       ref={containerRef}
-      className="relative h-full min-h-0 w-full min-w-0 flex-1 touch-none overflow-hidden bg-slate-950"
+      className="relative h-full min-h-0 w-full min-w-0 flex-1 touch-none overflow-hidden bg-canvas"
     >
       <Stage
         ref={stageRef}
@@ -732,6 +756,9 @@ export default function BoardCanvas({
         onDblTap={handleDoubleClick}
         onTouchMove={handleTouchMove}
         onTouchEnd={() => {
+          pinch.current = { dist: 0, center: null };
+        }}
+        onTouchCancel={() => {
           pinch.current = { dist: 0, center: null };
         }}
         onContextMenu={(e) => e.evt.preventDefault()}
@@ -934,23 +961,23 @@ export default function BoardCanvas({
         </Layer>
       </Stage>
 
-{linkSourceId && (
-  <div className="panel absolute left-3 top-3 z-30 flex max-w-[calc(100%-5rem)] items-center gap-2 py-1.5 pl-3 pr-1.5 text-xs text-ink shadow-lg">
-    <span>Select a note to connect to</span>
-    <button
-      type="button"
-      aria-label="Cancel linking"
-      title="Cancel (Esc)"
-      className="grid size-6 shrink-0 place-items-center rounded-lg text-dim transition-colors hover:bg-surface-4 hover:text-ink"
-      onClick={() => {
-        setLinkSourceId(null);
-        setLinkPreview(null);
-      }}
-    >
-      ✕
-    </button>
-  </div>
-)}
+      {linkSourceId && (
+        <div className="panel absolute left-3 top-3 z-30 flex max-w-[calc(100%-5rem)] items-center gap-2 py-1.5 pl-3 pr-1.5 text-xs text-ink shadow-lg">
+          <span>Select a note to connect to</span>
+          <button
+            type="button"
+            aria-label="Cancel linking"
+            title="Cancel (Esc)"
+            className="grid size-6 shrink-0 place-items-center rounded-lg text-dim transition-colors hover:bg-surface-4 hover:text-ink"
+            onClick={() => {
+              setLinkSourceId(null);
+              setLinkPreview(null);
+            }}
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       {/* HTML overlays (editors, toolbars, HUD) */}
       {editingNote && (
@@ -1013,63 +1040,68 @@ export default function BoardCanvas({
 
       {/* hint */}
       {!linkSourceId && (
-       <div className="panel pointer-events-none absolute left-3 top-3 z-10 hidden max-w-64 px-3 py-1.5 text-xs text-dim sm:block">
-        {phase === "converge"
-          ? "Click a note or cluster to drop a dot. Right-click takes one back."
-          : phase === "cluster"
-            ? "Drag notes together. Double-click empty space for a note, or create a cluster below."
-            : "Double-click to add a note. Select a note and press Link to connect it. N for a new note, Ctrl+K for commands."}
-      </div>
+        <div className="panel pointer-events-none absolute left-3 top-3 z-10 hidden max-w-64 px-3 py-1.5 text-xs text-dim sm:block">
+          {phase === "converge"
+            ? "Click a note or cluster to drop a dot. Right-click takes one back."
+            : phase === "cluster"
+              ? "Drag notes together. Double-click empty space for a note, or create a cluster below."
+              : "Double-click to add a note. Select a note and press Link to connect it. N for a new note, Ctrl+K for commands."}
+        </div>
       )}
 
-      {/* bottom-center actions */}
-      <div className="absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 items-center gap-2">
+      {/* Bottom actions */}
+      <div className="absolute bottom-3 left-2 right-14 z-10 flex flex-wrap items-center justify-center gap-2 sm:bottom-4 sm:left-1/2 sm:right-auto sm:max-w-[calc(100%-7rem)] sm:-translate-x-1/2">
         {phase !== "converge" && (
           <button
             type="button"
             onClick={addNoteAtCenter}
-            className="btn-primary rounded-full! shadow-lg px-2 text-sm"
+            className="inline-flex min-h-9 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl border border-accent/30 bg-accent px-3 text-xs font-semibold text-accent-contrast shadow-lg shadow-black/25 transition-colors hover:bg-accent-strong sm:min-h-11 sm:gap-2 sm:px-4 sm:text-sm"
           >
+            <span aria-hidden="true">＋</span>
             Add note
           </button>
         )}
+
         {phase === "cluster" && (
           <button
             type="button"
             onClick={createClusterAtCenter}
-            className="btn-ghost rounded-full! border-accent/40! bg-accent-soft! text-accent! shadow-lg hover:border-accent/60! px-2 text-sm"
+            className="inline-flex min-h-9 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl border border-line bg-surface-raised px-3 text-xs font-semibold text-accent shadow-lg shadow-black/25 transition-colors hover:bg-surface-hover sm:min-h-11 sm:gap-2 sm:px-4 sm:text-sm"
           >
+            <span aria-hidden="true">◇</span>
             New cluster
           </button>
         )}
       </div>
 
-      {/* zoom controls */}
-      <div className="panel absolute right-3 bottom-4 z-10 flex flex-col gap-0.5 p-1">
+      {/* Zoom controls */}
+      <div className="absolute bottom-3 right-2 z-10 flex flex-col gap-0.5 rounded-xl border border-line bg-surface-raised/95 p-0.5 shadow-xl shadow-black/20 backdrop-blur-xl sm:bottom-4 sm:right-3 sm:gap-1 sm:rounded-2xl sm:p-1">
         <button
           type="button"
           aria-label="Zoom in"
           onClick={() =>
             zoomAt({ x: size.width / 2, y: size.height / 2 }, 1.25)
           }
-          className="grid size-8 place-items-center rounded-lg text-sm text-dim transition-colors hover:bg-surface-4 hover:text-ink"
+          className="grid size-8 place-items-center rounded-xl text-base text-ink transition-colors hover:bg-surface-hover sm:size-8"
         >
           +
         </button>
+
         <button
           type="button"
           aria-label="Zoom out"
           onClick={() => zoomAt({ x: size.width / 2, y: size.height / 2 }, 0.8)}
-          className="grid size-8 place-items-center rounded-lg text-sm text-dim transition-colors hover:bg-surface-4 hover:text-ink"
+          className="grid size-8 place-items-center rounded-xl text-base text-ink transition-colors hover:bg-surface-hover sm:size-8"
         >
           -
         </button>
+
         <button
           type="button"
           aria-label="Fit board"
           onClick={fitView}
           title="Fit everything"
-          className="grid size-8 place-items-center rounded-lg text-[11px] font-medium text-dim transition-colors hover:bg-surface-4 hover:text-ink"
+          className="grid size-9 place-items-center rounded-xl text-[10px] font-semibold text-dim transition-colors hover:bg-surface-hover hover:text-ink sm:size-8"
         >
           Fit
         </button>

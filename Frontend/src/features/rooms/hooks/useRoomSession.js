@@ -118,9 +118,10 @@ export function useRoomSession(roomId, name) {
             setStatus("error");
             return;
           }
+
           setYou(res.you);
           applyState(res.state);
-          setStatus("joined");
+          setStatus("connected");
         },
       );
     }
@@ -266,10 +267,18 @@ export function useRoomSession(roomId, name) {
       }));
     };
 
-    const onDisconnect = () => setStatus("connecting");
+    const onDisconnect = () => {
+      setStatus("connecting");
+    };
+
+    const onConnectError = (err) => {
+      setError(err?.message ?? "Unable to connect to the server");
+      setStatus("error");
+    };
 
     socket.on("connect", join);
     socket.on("disconnect", onDisconnect);
+    socket.on("connect_error", onConnectError);
     socket.on(EV.ROOM_STATE, onRoomState);
     socket.on(EV.NOTE_CREATED, onNoteCreated);
     socket.on(EV.NOTE_UPDATED, onNoteChanged);
@@ -297,6 +306,7 @@ export function useRoomSession(roomId, name) {
     return () => {
       socket.off("connect", join);
       socket.off("disconnect", onDisconnect);
+      socket.off("connect_error", onConnectError);
       socket.off(EV.ROOM_STATE, onRoomState);
       socket.off(EV.NOTE_CREATED, onNoteCreated);
       socket.off(EV.NOTE_UPDATED, onNoteChanged);

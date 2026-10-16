@@ -62,7 +62,7 @@ export default function ClusterShape({
           shadowOpacity={0.5 + glow * 0.5}
         />
         <Text
-          text={`${cluster.name.toUpperCase()}`}
+          text={(cluster.name || "UNTITLED CLUSTER").toUpperCase()}
           x={-radius}
           y={-14 * inv}
           width={radius * 2}
@@ -129,7 +129,7 @@ export default function ClusterShape({
         shadowOpacity={glow > 0 ? 0.3 + glow * 0.5 : 0.25}
       />
       <Text
-        text={cluster.name.toUpperCase()}
+        text={(cluster.name || "UNTITLED CLUSTER").toUpperCase()}
         x={14}
         y={10}
         width={cluster.width - 28}

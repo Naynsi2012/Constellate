@@ -21,6 +21,7 @@ const PAN_STEP = 80;
 
 const isTypingTarget = (event) => {
   const el = event.target;
+
   return (
     el instanceof HTMLElement &&
     (el.tagName === "INPUT" ||
@@ -33,42 +34,72 @@ const isTypingTarget = (event) => {
 const Board = () => {
   const { roomId } = useParams();
   const navigate = useNavigate();
+
   const [name, setName] = useState(getName());
   const session = useRoomSession(roomId, name);
-  const { status, error, you, room, people, notes, edges, clusters, votes } =
-    session;
+
+  const {
+    status,
+    error,
+    you,
+    room,
+    people,
+    notes,
+    edges,
+    clusters,
+    votes,
+  } = session;
 
   const [selection, setSelection] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [linkSourceId, setLinkSourceId] = useState(null);
   const [paletteOpen, setPaletteOpen] = useState(false);
+
   const canvasApiRef = useRef(null);
 
   const handleSelect = useCallback((sel) => {
     setSelection(sel);
-    if (!sel || sel.type !== "note") setEditingId(null);
+
+    if (!sel || sel.type !== "note") {
+      setEditingId(null);
+    }
   }, []);
 
   useEffect(() => {
-    if (status === "error" && /not found/i.test(error ?? ""))
+    if (status === "error" && /not found/i.test(error ?? "")) {
       removeHostToken(roomId);
+    }
   }, [status, error, roomId]);
+
+  // Socket data can be briefly unavailable while a room connects.
+  const safeNotes = notes && typeof notes === "object" ? notes : {};
 
   const orderedNoteIds = useMemo(
     () =>
-      Object.values(notes)
-        .sort((a, b) => a.createdAt - b.createdAt || a.id.localeCompare(b.id))
-        .map((n) => n.id),
-    [notes],
+      Object.values(safeNotes)
+        .filter((note) => note && typeof note.id === "string")
+        .sort(
+          (a, b) =>
+            (a.createdAt ?? 0) - (b.createdAt ?? 0) ||
+            a.id.localeCompare(b.id),
+        )
+        .map((note) => note.id),
+    [safeNotes],
   );
 
   const focusRelative = useCallback(
     (direction) => {
       if (orderedNoteIds.length === 0) return;
+
       const current =
-        selection?.type === "note" ? orderedNoteIds.indexOf(selection.id) : -1;
+        selection?.type === "note"
+          ? orderedNoteIds.indexOf(selection.id)
+          : -1;
+
       const next =
-        (current + direction + orderedNoteIds.length) % orderedNoteIds.length;
+        (current + direction + orderedNoteIds.length) %
+        orderedNoteIds.length;
+
       canvasApiRef.current?.focusNote(orderedNoteIds[next]);
     },
     [orderedNoteIds, selection],
@@ -76,24 +107,51 @@ const Board = () => {
 
   const nextPhase = useCallback(() => {
     if (!room || !you?.isHost) return;
-    const next = PHASES[PHASES.indexOf(room.phase) + 1];
+
+    const currentIndex = PHASES.indexOf(room.phase);
+    const next = PHASES[currentIndex + 1];
+
     if (next) session.setPhase(next);
   }, [room, you, session]);
 
   const exportMarkdown = useCallback(async () => {
-    const res = await fetch(
-      `${import.meta.env.VITE_API_URL ?? ""}/api/rooms/${roomId}/export`,
-      { headers: { "x-host-token": getHostToken(roomId) ?? "" } },
-    );
-    if (!res.ok) return;
-    const blob = await res.blob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `constellate-${roomId}-results.md`;
-    a.click();
-    URL.revokeObjectURL(url);
-  }, [roomId]);
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL ?? "";
+      const res = await fetch(
+        `${apiUrl}/api/rooms/${roomId}/export`,
+        {
+          headers: {
+            "x-host-token": getHostToken(roomId) ?? "",
+          },
+        },
+      );
+
+      if (!res.ok) {
+        session.addToast?.({
+          kind: "error",
+          message: "Could not export the session.",
+        });
+        return;
+      }
+
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+
+      anchor.href = url;
+      anchor.download = `constellate-${roomId}-results.md`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch {
+      session.addToast?.({
+        kind: "error",
+        message: "Export failed. Check your connection and try again.",
+      });
+    }
+  }, [roomId, session]);
 
   useEffect(() => {
     const onKeyDown = (event) => {
@@ -101,23 +159,27 @@ const Board = () => {
 
       if (mod && event.key.toLowerCase() === "k") {
         event.preventDefault();
-        setPaletteOpen((v) => !v);
+        setPaletteOpen((value) => !value);
         return;
       }
-      if (paletteOpen) return; // the palette handles its own keys
-      if (isTypingTarget(event)) return;
+
+      if (paletteOpen || isTypingTarget(event)) return;
 
       if (mod && event.key === "Enter") {
         event.preventDefault();
         nextPhase();
         return;
       }
+
       if (mod && event.key.toLowerCase() === "z") {
         event.preventDefault();
+
         if (event.shiftKey) session.redo();
         else session.undo();
+
         return;
       }
+
       if (mod && event.key.toLowerCase() === "y") {
         event.preventDefault();
         session.redo();
@@ -125,81 +187,112 @@ const Board = () => {
       }
 
       const api = canvasApiRef.current;
+
       switch (event.key) {
         case "Escape":
           api?.escape();
           break;
+
         case "Tab":
           event.preventDefault();
           focusRelative(event.shiftKey ? -1 : 1);
           break;
+
         case "Enter":
           if (selection?.type === "note") {
             event.preventDefault();
             api?.editNote(selection.id);
           }
           break;
+
         case "Delete":
         case "Backspace":
-          event.preventDefault();
           if (selection?.type === "note") {
+            event.preventDefault();
             session.deleteNote(selection.id);
             setSelection(null);
           } else if (selection?.type === "edge") {
+            event.preventDefault();
             session.deleteEdge(selection.id);
             setSelection(null);
           } else if (selection?.type === "cluster") {
+            event.preventDefault();
             session.deleteCluster(selection.id);
             setSelection(null);
           }
           break;
+
         case "ArrowUp":
           event.preventDefault();
           api?.panBy(0, PAN_STEP);
           break;
+
         case "ArrowDown":
           event.preventDefault();
           api?.panBy(0, -PAN_STEP);
           break;
+
         case "ArrowLeft":
           event.preventDefault();
           api?.panBy(PAN_STEP, 0);
           break;
+
         case "ArrowRight":
           event.preventDefault();
           api?.panBy(-PAN_STEP, 0);
           break;
+
         case "+":
         case "=":
           api?.zoomIn();
           break;
+
         case "-":
         case "_":
           api?.zoomOut();
           break;
+
         default: {
           const key = event.key.toLowerCase();
+
           if (key === "n" && room?.phase !== "converge") {
             api?.addNoteAtCenter();
-          } else if (key === "l" && selection?.type === "note") {
+          } else if (
+            key === "l" &&
+            selection?.type === "note" &&
+            room?.phase !== "converge"
+          ) {
             api?.startLinkFrom(selection.id);
           } else if (key === "v" && room?.phase === "converge" && selection) {
-            if (selection.type === "note")
+            if (selection.type === "note") {
               session.addVote(selection.id, "note");
-            if (selection.type === "cluster")
+            }
+
+            if (selection.type === "cluster") {
               session.addVote(selection.id, "cluster");
+            }
           }
         }
       }
     };
 
     window.addEventListener("keydown", onKeyDown);
+
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [paletteOpen, selection, room, session, focusRelative, nextPhase]);
+  }, [
+    paletteOpen,
+    selection,
+    room,
+    session,
+    focusRelative,
+    nextPhase,
+  ]);
 
   const commands = useMemo(() => {
     if (!room || !you) return [];
+
     const api = () => canvasApiRef.current;
+
     const list = [
       {
         label: "Create note",
@@ -220,13 +313,31 @@ const Board = () => {
       },
       {
         label: "Previous phase",
-        run: () => session.setPhase(PHASES[PHASES.indexOf(room.phase) - 1]),
+        run: () => {
+          const previous = PHASES[PHASES.indexOf(room.phase) - 1];
+          if (you.isHost && previous) session.setPhase(previous);
+        },
         show: you.isHost && PHASES.indexOf(room.phase) > 0,
       },
-      { label: "Zoom in", hint: "+", run: () => api()?.zoomIn() },
-      { label: "Zoom out", hint: "−", run: () => api()?.zoomOut() },
-      { label: "Fit everything on screen", run: () => api()?.fitView() },
-      { label: "Focus next note", hint: "Tab", run: () => focusRelative(1) },
+      {
+        label: "Zoom in",
+        hint: "+",
+        run: () => api()?.zoomIn(),
+      },
+      {
+        label: "Zoom out",
+        hint: "−",
+        run: () => api()?.zoomOut(),
+      },
+      {
+        label: "Fit everything on screen",
+        run: () => api()?.fitView(),
+      },
+      {
+        label: "Focus next note",
+        hint: "Tab",
+        run: () => focusRelative(1),
+      },
       {
         label: "Focus previous note",
         hint: "Shift+Tab",
@@ -243,9 +354,13 @@ const Board = () => {
         label: "Vote for selected",
         hint: "V",
         run: () => {
-          if (selection?.type === "note") session.addVote(selection.id, "note");
-          if (selection?.type === "cluster")
+          if (selection?.type === "note") {
+            session.addVote(selection.id, "note");
+          }
+
+          if (selection?.type === "cluster") {
             session.addVote(selection.id, "cluster");
+          }
         },
         show: room.phase === "converge" && !!selection,
       },
@@ -266,10 +381,17 @@ const Board = () => {
         run: () =>
           navigator.clipboard?.writeText(window.location.href).catch(() => {}),
       },
-      { label: "View results", run: () => navigate(`/room/${roomId}/results`) },
-      { label: "Export Markdown", run: exportMarkdown },
+      {
+        label: "View results",
+        run: () => navigate(`/room/${roomId}/results`),
+      },
+      {
+        label: "Export Markdown",
+        run: exportMarkdown,
+      },
     ];
-    return list.filter((c) => c.show !== false);
+
+    return list.filter((command) => command.show !== false);
   }, [
     room,
     you,
@@ -296,15 +418,17 @@ const Board = () => {
 
   if (status === "error") {
     return (
-      <main className="grid h-dvh place-items-center bg-slate-950 px-4 text-slate-100">
+      <main className="grid min-h-dvh place-items-center bg-canvas px-4 py-8 text-ink">
         <div className="max-w-sm text-center">
           <h1 className="mb-2 text-xl font-semibold">
             Couldn't join this room
           </h1>
-          <p className="mb-4 opacity-70">{error}</p>
+
+          <p className="mb-4 text-sm text-dim">{error}</p>
+
           <Link
             to="/"
-            className="rounded bg-white px-3 py-2 font-medium text-slate-900"
+            className="inline-flex min-h-11 items-center justify-center rounded-xl bg-accent px-4 py-2.5 text-sm font-semibold text-accent-contrast transition-colors hover:bg-accent-strong"
           >
             Create a new room
           </Link>
@@ -315,23 +439,29 @@ const Board = () => {
 
   if (!room || !you) {
     return (
-      <main className="grid h-dvh place-items-center bg-slate-950 text-slate-100">
-        <p className="opacity-70">Connecting…</p>
+      <main className="grid min-h-dvh place-items-center bg-canvas px-4 py-8 text-ink">
+        <p className="text-sm text-dim">Connecting to your room…</p>
       </main>
     );
   }
 
   return (
-    <div className="flex h-dvh flex-col overflow-hidden bg-slate-950 text-slate-100">
+    <div className="flex h-dvh min-h-0 w-full min-w-0 flex-col overflow-hidden bg-canvas text-ink">
       <RoomHeader
         roomId={roomId}
         room={room}
         you={you}
         people={people}
         status={status}
+        session={session}
       />
-      <PhaseBar room={room} you={you} session={session} />
-      <div className="relative min-h-0 flex-1">
+
+      {/* Desktop keeps the workflow visible; mobile accesses it in the drawer. */}
+      <div className="hidden shrink-0 md:block">
+        <PhaseBar room={room} you={you} session={session} />
+      </div>
+
+      <main className="relative min-h-0 min-w-0 flex-1 overflow-hidden">
         <BoardCanvas
           session={session}
           you={you}
@@ -347,15 +477,22 @@ const Board = () => {
           setLinkSourceId={setLinkSourceId}
           canvasApiRef={canvasApiRef}
         />
+
         <VoteHud room={room} votes={votes} you={you} />
+
         {!room.question && (
           <LobbyPrompt
             isHost={you.isHost}
-            onSubmit={(q) => session.setQuestion(q)}
+            onSubmit={(question) => session.setQuestion(question)}
           />
         )}
-      </div>
-      <Toasts toasts={session.toasts} onDismiss={session.dismissToast} />
+      </main>
+
+      <Toasts
+        toasts={session.toasts}
+        onDismiss={session.dismissToast}
+      />
+
       <CommandPalette
         open={paletteOpen}
         commands={commands}
