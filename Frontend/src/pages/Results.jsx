@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router";
 import { getResults, downloadExport } from "../features/rooms/api";
+import LogoMark from "../components/LogoMark";
 
 function ArrowLeftIcon() {
   return (
@@ -249,28 +250,7 @@ export default function Results() {
             to="/"
             className="inline-flex min-h-10 items-center gap-2 rounded-xl pr-2 text-sm font-semibold text-ink transition-colors hover:text-accent"
           >
-            <span className="grid size-9 place-items-center rounded-xl border border-line bg-surface-raised text-accent">
-              <svg
-                viewBox="0 0 24 24"
-                className="size-5"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.7"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-              >
-                <circle cx="12" cy="12" r="3" />
-                <ellipse cx="12" cy="12" rx="10" ry="4.5" />
-                <ellipse
-                  cx="12"
-                  cy="12"
-                  rx="10"
-                  ry="4.5"
-                  transform="rotate(60 12 12)"
-                />
-              </svg>
-            </span>
+            <LogoMark />
             Constellate
           </Link>
 

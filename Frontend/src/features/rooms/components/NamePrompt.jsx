@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import LogoMark from "../../../components/LogoMark";
 
 export default function NamePrompt({ roomId, onSubmit }) {
   const [name, setName] = useState("");
@@ -15,21 +16,7 @@ export default function NamePrompt({ roomId, onSubmit }) {
 
       <div className="relative w-full max-w-md">
         <div className="mb-6 flex items-center justify-center gap-2.5">
-          <span className="grid size-9 place-items-center rounded-xl border border-accent/25 bg-accent/10 text-accent">
-            <svg
-              viewBox="0 0 24 24"
-              className="size-5"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.6"
-              aria-hidden="true"
-            >
-              <circle cx="12" cy="12" r="2.3" />
-              <circle cx="5" cy="6" r="1.4" />
-              <circle cx="19" cy="6" r="1.4" />
-              <path d="m10.3 10.5-4-3.3m7.4 3.3 4-3.3" />
-            </svg>
-          </span>
+          <LogoMark />
           <span className="text-sm font-semibold text-ink">Constellate</span>
         </div>
 
