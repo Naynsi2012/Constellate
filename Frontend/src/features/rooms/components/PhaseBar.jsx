@@ -193,7 +193,7 @@ export default function PhaseBar({ room, you, session, compact = false }) {
             compact ? "w-full" : ""
           }`}
         >
-          {PHASE_LABELS[next]} →
+          Next phase →
         </button>
       )}
     </div>
