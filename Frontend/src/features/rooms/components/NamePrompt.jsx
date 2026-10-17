@@ -1,6 +1,4 @@
-
 import { useState } from "react";
-import LogoMark from "../../../components/LogoMark";
 
 export default function NamePrompt({ roomId, onSubmit }) {
   const [name, setName] = useState("");
@@ -16,7 +14,6 @@ export default function NamePrompt({ roomId, onSubmit }) {
 
       <div className="relative w-full max-w-md">
         <div className="mb-6 flex items-center justify-center gap-2.5">
-          <LogoMark />
           <span className="text-sm font-semibold text-ink">Constellate</span>
         </div>
 

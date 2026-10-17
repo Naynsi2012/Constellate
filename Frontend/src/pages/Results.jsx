@@ -1,8 +1,6 @@
-
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router";
 import { getResults, downloadExport } from "../features/rooms/api";
-import LogoMark from "../components/LogoMark";
 
 function ArrowLeftIcon() {
   return (
@@ -79,9 +77,7 @@ function ErrorResults({ error, roomId }) {
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-faint">
           Session results
         </p>
-        <h1 className="mt-2 text-xl font-semibold">
-          Could not load results
-        </h1>
+        <h1 className="mt-2 text-xl font-semibold">Could not load results</h1>
         <p className="mt-2 wrap-break-word text-sm leading-6 text-dim">
           {error || "Something went wrong while loading this session."}
         </p>
@@ -105,18 +101,13 @@ function StatCard({ label, value, detail }) {
       <p className="mt-2 text-2xl font-semibold tracking-tight text-ink tabular-nums sm:text-3xl">
         {value}
       </p>
-      {detail && (
-        <p className="mt-1 text-xs text-faint">{detail}</p>
-      )}
+      {detail && <p className="mt-1 text-xs text-faint">{detail}</p>}
     </div>
   );
 }
 
 function VoteBar({ votes, maxVotes, color }) {
-  const percentage = Math.min(
-    100,
-    Math.max(0, (votes / maxVotes) * 100),
-  );
+  const percentage = Math.min(100, Math.max(0, (votes / maxVotes) * 100));
 
   return (
     <div
@@ -197,8 +188,7 @@ export default function Results() {
   );
 
   const topClusters = useMemo(
-    () =>
-      Array.isArray(results?.topClusters) ? results.topClusters : [],
+    () => (Array.isArray(results?.topClusters) ? results.topClusters : []),
     [results],
   );
 
@@ -250,7 +240,6 @@ export default function Results() {
             to="/"
             className="inline-flex min-h-10 items-center gap-2 rounded-xl pr-2 text-sm font-semibold text-ink transition-colors hover:text-accent"
           >
-            <LogoMark />
             Constellate
           </Link>
 
@@ -340,9 +329,7 @@ export default function Results() {
 
           {topClusters.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-line bg-surface/50 px-4 py-8 text-center sm:py-10">
-              <p className="text-sm font-medium text-ink">
-                No clusters yet
-              </p>
+              <p className="text-sm font-medium text-ink">No clusters yet</p>
               <p className="mt-1 text-sm text-dim">
                 Grouped ideas will appear here once your team creates clusters.
               </p>
@@ -383,9 +370,7 @@ export default function Results() {
                         <p className="text-lg font-semibold tabular-nums text-ink">
                           {cluster.votes ?? 0}
                         </p>
-                        <p className="text-[10px] text-faint">
-                          votes
-                        </p>
+                        <p className="text-[10px] text-faint">votes</p>
                       </div>
                     </div>
 
@@ -445,9 +430,7 @@ export default function Results() {
                           </p>
 
                           <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-faint">
-                            <span>
-                              {note.author || "Anonymous"}
-                            </span>
+                            <span>{note.author || "Anonymous"}</span>
 
                             {note.cluster && (
                               <>
@@ -464,9 +447,7 @@ export default function Results() {
                           <p className="text-lg font-semibold leading-none tabular-nums text-ink">
                             {note.votes ?? 0}
                           </p>
-                          <p className="mt-1 text-[10px] text-faint">
-                            votes
-                          </p>
+                          <p className="mt-1 text-[10px] text-faint">votes</p>
                         </div>
                       </div>
 

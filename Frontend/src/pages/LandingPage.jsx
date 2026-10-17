@@ -1,39 +1,146 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { useRoom } from "../features/rooms/hooks/useRoom";
 import { getHostedRoomIds, getName } from "../lib/identity";
-import LogoMark from "../components/LogoMark";
 
-const FEATURES = [
+const WORDS = [
+  { text: "messy", font: '"Rock Salt", cursive' },
   {
-    number: "01",
-    title: "Think independently",
-    description: "Capture ideas before the group converges. Silent brainstorming keeps the focus on the idea, not its author.",
+    text: "creative",
+    font: '"Instrument Serif", serif',
+    italic: true,
   },
+  { text: "bold", font: '"Syne", sans-serif', weight: 800 },
   {
-    number: "02",
-    title: "Find the patterns",
-    description: "Bring related thoughts together, name the themes and turn a scattered board into a shared picture."
+    text: "curious",
+    font: '"Playfair Display", serif',
+    italic: true,
+    weight: 700,
   },
-  {
-    number: "03",
-    title: "Decide together",
-    description: "Spend a limited number of votes to surface the ideas your team believes matter most."
-  }
+  { text: "chaotic", font: '"Permanent Marker", cursive' },
+  { text: "wild", font: '"Caveat Brush", cursive' },
 ];
+
+const WORD_INTERVAL = 2600;
+const WORD_EXIT = 380;
+const WORD_SIZE = "0.85em"; // same size for every word, so nothing shifts
+
+const STEPS = [
+  {
+    title: "Think on your own first",
+    description:
+      "Everyone adds ideas quietly, so the best one wins, not the loudest voice.",
+  },
+  {
+    title: "Group what belongs together",
+    description: "Pull related notes into clusters and name the themes.",
+  },
+  {
+    title: "Vote on what matters",
+    description:
+      "Everyone gets a few votes. The top ideas rise to the surface.",
+  },
+];
+
+function RotatingWord() {
+  const [index, setIndex] = useState(0);
+  const [leaving, setLeaving] = useState(false);
+
+  useEffect(() => {
+    let swapTimer;
+    const timer = setInterval(() => {
+      setLeaving(true);
+      swapTimer = setTimeout(() => {
+        setIndex((i) => (i + 1) % WORDS.length);
+        setLeaving(false);
+      }, WORD_EXIT);
+    }, WORD_INTERVAL);
+
+    return () => {
+      clearInterval(timer);
+      clearTimeout(swapTimer);
+    };
+  }, []);
+
+  const word = WORDS[index];
+
+  // Inline, so it sits right after "start" on the same line.
+  return (
+    <span className="ml-[0.25em] inline-block whitespace-nowrap align-baseline text-accent">
+      <span
+        key={index}
+        aria-hidden="true"
+        className={`inline-block ${leaving ? "word-out" : "word-in"}`}
+        style={{
+          fontFamily: word.font,
+          fontSize: WORD_SIZE,
+          fontStyle: word.italic ? "italic" : "normal",
+          fontWeight: word.weight ?? 400,
+          letterSpacing: "-0.01em",
+        }}
+      >
+        {word.text}.
+      </span>
+      <span className="sr-only">
+        messy, creative, bold, curious, chaotic, wild.
+      </span>
+    </span>
+  );
+}
+
+function Modal({ title, subtitle, onClose, children }) {
+  useEffect(() => {
+    const onKey = (event) => event.key === "Escape" && onClose();
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-5 backdrop-blur-sm modal-backdrop"
+      onMouseDown={(event) => event.target === event.currentTarget && onClose()}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+        className="modal-card w-full max-w-md rounded-2xl border border-line bg-surface p-6 shadow-2xl sm:p-8"
+      >
+        <div className="mb-6 flex items-start justify-between gap-4">
+          <div>
+            <h2 className="font-display text-2xl font-semibold tracking-tight text-ink">
+              {title}
+            </h2>
+            <p className="mt-1.5 text-sm leading-6 text-dim">{subtitle}</p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            className="-mr-2 -mt-2 rounded-full p-2 text-dim transition-colors hover:text-ink"
+          >
+            ✕
+          </button>
+        </div>
+        {children}
+      </div>
+    </div>
+  );
+}
 
 export default function LandingPage() {
   const navigate = useNavigate();
   const { loading, error, handleCreateRoom } = useRoom();
 
+  const [modal, setModal] = useState(null); // "create" | "join" | null
   const [name, setName] = useState(getName());
   const [question, setQuestion] = useState("");
+  const [joinCode, setJoinCode] = useState("");
 
   const hostedRooms = getHostedRoomIds();
 
-  async function handleSubmit(event) {
+  async function handleCreate(event) {
     event.preventDefault();
-
     if (!name.trim()) return;
 
     const roomId = await handleCreateRoom({
@@ -44,196 +151,224 @@ export default function LandingPage() {
     if (roomId) navigate(`/room/${roomId}`);
   }
 
+  function handleJoin(event) {
+    event.preventDefault();
+    // Accepts a bare room code or a full pasted link.
+    const roomId = joinCode.trim().split("/").filter(Boolean).pop();
+    if (roomId) navigate(`/room/${roomId}`);
+  }
+
   return (
-    <main className="min-h-screen overflow-hidden bg-canvas text-ink">
-      <header className="mx-auto flex max-w-7xl items-center justify-between px-5 py-6 sm:px-8">
-        <Link
-          to="/"
-          className="flex items-center gap-3 text-sm font-semibold tracking-wide text-ink"
-        >
-          <LogoMark />
-          CONSTELLATE
-        </Link>
+    <main className="relative min-h-screen overflow-hidden bg-canvas font-body text-ink">
+      <div
+        className="pointer-events-none absolute inset-0 z-0"
+        aria-hidden="true"
+      >
+        <div className="bg-fallback absolute inset-0" />
+        <video
+          className="absolute inset-0 h-full w-full object-cover opacity-60"
+          src="/background.mp4"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+        />
+        <div className="absolute inset-0 bg-linear-to-r from-canvas/90 via-canvas/55 to-canvas/30" />
+        <div className="absolute inset-0 bg-linear-to-t from-canvas via-transparent to-canvas/60" />
+      </div>
 
-        <span className="hidden text-xs tracking-wide text-dim sm:block">
-          A shared space to think clearly.
-        </span>
-      </header>
+      <div className="relative z-10 flex min-h-screen flex-col">
+        <header className="mx-auto flex w-full max-w-7xl items-center justify-between px-5 py-7 sm:px-8">
+          <Link
+            to="/"
+            className="flex items-center gap-3 font-display text-base font-semibold tracking-tight text-ink"
+          >
+            Constellate
+          </Link>
 
-      <div className="mx-auto grid max-w-7xl items-start gap-14 px-5 pb-20 pt-10 sm:px-8 lg:grid-cols-[1.1fr_0.9fr] lg:gap-20 lg:pt-20">
-        <section className="max-w-2xl">
-          <p className="mb-6 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.2em] text-accent">
-            <span className="h-px w-8 bg-accent" />
-            Collaborative thinking, made tangible
-          </p>
+          <button
+            type="button"
+            onClick={() => setModal("create")}
+            className="rounded-full border border-white/20 bg-white/10 px-5 py-2 text-sm font-medium text-ink backdrop-blur transition-colors hover:bg-white/20"
+          >
+            Get started
+          </button>
+        </header>
 
-          <h1 className="max-w-xl text-5xl font-semibold leading-[1.04] tracking-[-0.055em] text-ink sm:text-6xl lg:text-7xl">
-            Good ideas
-            <br />
-            start messy<span className="text-accent">.</span>
-          </h1>
+        <div className="mx-auto grid w-full max-w-7xl flex-1 items-center gap-12 px-5 py-10 sm:px-8 lg:grid-cols-[1fr_18rem] lg:gap-16 lg:py-10">
+          <section>
+            <h1 className="font-display text-6xl font-semibold leading-[1.02] tracking-[-0.045em] sm:text-7xl lg:text-[7.5rem]">
+              Good ideas
+              <br />
+              start
+              <RotatingWord />
+            </h1>
 
-          <p className="mt-7 max-w-lg text-base leading-7 text-dim sm:text-lg">
-            Give your team room to think, discover connections, and decide what
-            deserves attention. One shared canvas, from first thought to final
-            direction.
-          </p>
-
-          <div className="mt-10 grid max-w-xl grid-cols-1 gap-0 border-y border-line sm:grid-cols-3">
-            {FEATURES.map((feature, index) => (
-              <div
-                key={feature.number}
-                className={`py-5 ${
-                  index !== 0
-                    ? "border-t border-line sm:border-l sm:border-t-0 sm:pl-4"
-                    : ""
-                } ${index !== 0 ? "sm:ml-4" : ""}`}
-              >
-                <span className="text-xs font-medium tracking-widest text-accent">
-                  {feature.number}
-                </span>
-                <h2 className="mt-3 text-sm font-semibold text-ink">
-                  {feature.title}
-                </h2>
-                <p className="mt-2 text-xs leading-5 text-dim">
-                  {feature.description}
-                </p>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-10 hidden max-w-xl sm:block">
-            <div className="relative overflow-hidden rounded-2xl border border-line bg-surface p-5">
-              <div className="flex items-center justify-between border-b border-line pb-4">
-                <div>
-                  <p className="text-xs font-medium text-ink">
-                    A glimpse of the process
-                  </p>
-                  <p className="mt-1 text-xs text-faint">
-                    Explore ideas. Connect the dots.
-                  </p>
-                </div>
-                <span className="rounded-full border border-line px-2.5 py-1 text-[10px] text-dim">
-                  3 stages
-                </span>
-              </div>
-
-              <div className="grid grid-cols-3 gap-3 pt-5">
-                <div className="-rotate-2 rounded-lg border border-amber-200/40 bg-[#f8dfa0] p-3 text-slate-900 shadow-lg shadow-black/10">
-                  <span className="text-[9px] font-semibold uppercase tracking-wider text-slate-600">
-                    Diverge
-                  </span>
-                  <p className="mt-3 text-xs font-medium">
-                    What if we tried something new?
-                  </p>
-                </div>
-                <div className="translate-y-2 rotate-2 rounded-lg border border-sky-200/40 bg-[#b9d8f4] p-3 text-slate-900 shadow-lg shadow-black/10">
-                  <span className="text-[9px] font-semibold uppercase tracking-wider text-slate-600">
-                    Cluster
-                  </span>
-                  <p className="mt-3 text-xs font-medium">
-                    Find the common thread.
-                  </p>
-                </div>
-                <div className="-rotate-1 rounded-lg border border-emerald-200/40 bg-[#c5dfb8] p-3 text-slate-900 shadow-lg shadow-black/10">
-                  <span className="text-[9px] font-semibold uppercase tracking-wider text-slate-600">
-                    Converge
-                  </span>
-                  <p className="mt-3 text-xs font-medium">
-                    Choose what matters.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="w-full max-w-xl lg:ml-auto">
-          <div className="border border-line bg-surface p-5 sm:p-7">
-            <div className="mb-7">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">
-                Start a session
-              </p>
-              <h2 className="mt-3 text-2xl font-semibold tracking-tight text-ink">
-                Bring your team together.
-              </h2>
-              <p className="mt-2 text-sm leading-6 text-dim">
-                Create a room and invite others to contribute.
-              </p>
-            </div>
-
-            <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-              <div>
-                <label
-                  htmlFor="name"
-                  className="mb-2 block text-xs font-medium text-dim"
+            <ul className="mt-12 max-w-lg space-y-7">
+              {STEPS.map((step, i) => (
+                <li
+                  key={step.title}
+                  className="step-in"
+                  style={{ animationDelay: `${0.5 + i * 0.35}s` }}
                 >
-                  Your name
-                </label>
-                <input
-                  id="name"
-                  placeholder="e.g. Ada"
-                  value={name}
-                  maxLength={30}
-                  onChange={(event) => setName(event.target.value)}
-                  required
-                  className="w-full border border-line bg-canvas px-3.5 py-3 text-sm text-ink placeholder:text-faint focus:border-accent-strong focus:outline-none"
-                />
-              </div>
+                  <h2 className="text-base font-semibold text-ink">
+                    {step.title}
+                  </h2>
+                  <p className="mt-1.5 text-sm leading-6 text-dim">
+                    {step.description}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </section>
 
-              <div>
-                <label
-                  htmlFor="question"
-                  className="mb-2 block text-xs font-medium text-dim"
-                >
-                  What are we trying to solve?
-                  <span className="ml-2 font-normal text-faint">Optional</span>
-                </label>
-                <textarea
-                  id="question"
-                  placeholder="How might we make our next launch better?"
-                  value={question}
-                  maxLength={200}
-                  rows={3}
-                  onChange={(event) => setQuestion(event.target.value)}
-                  className="w-full resize-y border border-line bg-canvas px-3.5 py-3 text-sm leading-6 text-ink placeholder:text-faint focus:border-accent-strong focus:outline-none"
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={loading || !name.trim()}
-                className="flex w-full items-center justify-center gap-2 bg-accent px-4 py-3 text-sm font-semibold text-accent-contrast transition-colors hover:bg-accent-strong disabled:cursor-not-allowed disabled:opacity-50"
+          <section className="flex w-full max-w-sm flex-col gap-4 lg:ml-auto">
+            <button
+              type="button"
+              onClick={() => setModal("create")}
+              className="cta-btn group flex items-center justify-between rounded-2xl bg-accent px-6 py-5 text-lg font-semibold text-accent-contrast transition-colors hover:bg-accent-strong"
+            >
+              Create a room
+              <span
+                className="transition-transform group-hover:translate-x-1"
+                aria-hidden="true"
               >
-                {loading ? "Creating your room…" : "Create a room"}
-                {!loading && <span aria-hidden="true">→</span>}
-              </button>
+                →
+              </span>
+            </button>
 
-              {error && (
-                <p role="alert" className="text-sm text-danger">
-                  {error}
-                </p>
-              )}
-            </form>
+            <button
+              type="button"
+              onClick={() => setModal("join")}
+              className="group flex items-center justify-between rounded-2xl border border-white/25 bg-white/5 px-6 py-5 text-lg font-semibold text-ink backdrop-blur transition-colors hover:border-white/50 hover:bg-white/10"
+            >
+              Join a room
+              <span
+                className="transition-transform group-hover:translate-x-1"
+                aria-hidden="true"
+              >
+                →
+              </span>
+            </button>
 
-            <p className="mt-5 border-t border-line pt-4 text-xs leading-5 text-faint">
-              No setup required. Create a session, share the link, and start
-              thinking together.
+            <p className="mt-2 text-sm leading-6 text-faint">
+              No sign-up. Create a room, share the link, and start thinking
+              together.
             </p>
+          </section>
+        </div>
+
+        <footer className="px-5 py-6 sm:px-8">
+          <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-2 text-xs text-faint">
+            <span>Constellate</span>
+            <span>From scattered thoughts to shared direction.</span>
           </div>
+        </footer>
+      </div>
+
+      {modal === "create" && (
+        <Modal
+          title="Create a room"
+          subtitle="Tell us who you are and what you're working on. You can share the link right after."
+          onClose={() => setModal(null)}
+        >
+          <form onSubmit={handleCreate} className="flex flex-col gap-5">
+            <div>
+              <label
+                htmlFor="name"
+                className="mb-2 block text-sm font-medium text-dim"
+              >
+                Your name
+              </label>
+              <input
+                id="name"
+                autoFocus
+                placeholder="e.g. Ada"
+                value={name}
+                maxLength={30}
+                onChange={(event) => setName(event.target.value)}
+                required
+                className="w-full rounded-xl border border-line bg-canvas px-3.5 py-3 text-sm text-ink placeholder:text-faint focus:border-accent-strong focus:outline-none"
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="question"
+                className="mb-2 block text-sm font-medium text-dim"
+              >
+                What are we trying to solve?
+                <span className="ml-2 font-normal text-faint">Optional</span>
+              </label>
+              <textarea
+                id="question"
+                placeholder="How might we make our next launch better?"
+                value={question}
+                maxLength={200}
+                rows={3}
+                onChange={(event) => setQuestion(event.target.value)}
+                className="w-full resize-y rounded-xl border border-line bg-canvas px-3.5 py-3 text-sm leading-6 text-ink placeholder:text-faint focus:border-accent-strong focus:outline-none"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading || !name.trim()}
+              className="w-full rounded-xl bg-accent px-4 py-3 text-sm font-semibold text-accent-contrast transition-colors hover:bg-accent-strong disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {loading ? "Creating your room…" : "Create room"}
+            </button>
+
+            {error && (
+              <p role="alert" className="text-sm text-danger">
+                {error}
+              </p>
+            )}
+          </form>
+        </Modal>
+      )}
+
+      {modal === "join" && (
+        <Modal
+          title="Join a room"
+          subtitle="Paste the room link or enter the room code you were given."
+          onClose={() => setModal(null)}
+        >
+          <form onSubmit={handleJoin} className="flex flex-col gap-5">
+            <div>
+              <label
+                htmlFor="code"
+                className="mb-2 block text-sm font-medium text-dim"
+              >
+                Room link or code
+              </label>
+              <input
+                id="code"
+                autoFocus
+                placeholder="Paste a link or code"
+                value={joinCode}
+                onChange={(event) => setJoinCode(event.target.value)}
+                required
+                className="w-full rounded-xl border border-line bg-canvas px-3.5 py-3 text-sm text-ink placeholder:text-faint focus:border-accent-strong focus:outline-none"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={!joinCode.trim()}
+              className="w-full rounded-xl bg-accent px-4 py-3 text-sm font-semibold text-accent-contrast transition-colors hover:bg-accent-strong disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Join room
+            </button>
+          </form>
 
           {hostedRooms.length > 0 && (
-            <section className="mt-8">
-              <div className="mb-3 flex items-center justify-between">
-                <h2 className="text-xs font-semibold uppercase tracking-widest text-dim">
-                  Your recent rooms
-                </h2>
-                <span className="text-xs text-faint">
-                  {hostedRooms.length} saved
-                </span>
-              </div>
-
-              <ul className="divide-y divide-line border-y border-line">
+            <div className="mt-7">
+              <h3 className="mb-2 text-sm font-medium text-dim">
+                Rooms you've hosted
+              </h3>
+              <ul className="max-h-40 divide-y divide-line overflow-y-auto border-y border-line">
                 {hostedRooms.map((roomId) => (
                   <li key={roomId}>
                     <Link
@@ -241,22 +376,15 @@ export default function LandingPage() {
                       className="flex items-center justify-between gap-3 py-3 text-sm transition-colors hover:text-accent"
                     >
                       <span className="font-mono text-xs">{roomId}</span>
-                      <span className="text-xs text-dim">Open room →</span>
+                      <span className="text-xs text-dim">Open</span>
                     </Link>
                   </li>
                 ))}
               </ul>
-            </section>
+            </div>
           )}
-        </section>
-      </div>
-
-      <footer className="border-t border-line px-5 py-5 sm:px-8">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-2 text-xs text-faint">
-          <span>CONSTELLATE | Think together</span>
-          <span>From scattered thoughts to shared direction.</span>
-        </div>
-      </footer>
+        </Modal>
+      )}
     </main>
   );
 }

@@ -1,5 +1,4 @@
 import { useState } from "react";
-import LogoMark from "../../../components/LogoMark";
 
 export default function LobbyPrompt({ isHost, onSubmit }) {
   const [question, setQuestion] = useState("");

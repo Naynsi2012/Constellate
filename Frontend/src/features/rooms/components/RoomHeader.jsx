@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
 import PhaseBar from "./PhaseBar";
-import LogoMark from "../../../components/LogoMark";
 
 function MenuIcon({ open = false }) {
   return (
@@ -193,8 +192,6 @@ export default function RoomHeader({
           aria-label="Constellate home"
           className="flex min-w-0 shrink items-center gap-2 rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-accent"
         >
-          <LogoMark />
-
           <span className="min-w-0">
             <span className="block truncate text-[13px] font-semibold leading-tight text-ink sm:text-sm">
               Constellate
@@ -297,8 +294,6 @@ export default function RoomHeader({
             className="absolute inset-y-0 right-0 flex w-[min(19rem,88vw)] flex-col overflow-hidden border-l border-line bg-surface shadow-2xl shadow-black/40"
           >
             <div className="flex h-12 shrink-0 items-center gap-2 border-b border-line px-3 sm:h-13.5 sm:px-3.5">
-              <LogoMark />
-
               <div className="min-w-0 flex-1">
                 <p className="text-xs font-semibold text-ink">Room menu</p>
                 <p className="truncate text-[9px] text-faint">{roomId}</p>
