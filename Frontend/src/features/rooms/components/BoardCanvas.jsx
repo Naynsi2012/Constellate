@@ -78,7 +78,7 @@ function makeStars(count) {
 }
 
 function NoteEditorOverlay({ note, view, onCommit, onCancel }) {
-  const [draft, setDraft] = useState(note.text);
+  const [draft, setDraft] = useState(note.text ?? "");
   const committedRef = useRef(false);
   const areaRef = useRef(null);
 
@@ -145,6 +145,12 @@ function NoteEditorOverlay({ note, view, onCommit, onCancel }) {
   );
 }
 
+const canVoteOnNote = (note) =>
+  typeof note?.text === "string" && note.text.trim().length > 0;
+
+const canVoteOnCluster = (cluster) =>
+  typeof cluster?.name === "string" && cluster.name.trim().length > 0;
+
 // Floating style toolbar above the selected note
 function NoteToolbar({
   note,
@@ -197,7 +203,12 @@ function NoteToolbar({
     >
       {phase === "converge" && !isQuestion ? (
         <>
-          <button type="button" className={btn} onClick={() => onVote(note.id)}>
+          <button
+            type="button"
+            className={btn}
+            disabled={!canVoteOnNote(note)}
+            onClick={() => onVote(note.id)}
+          >
             Add dot
           </button>
           <button
@@ -712,6 +723,10 @@ export default function BoardCanvas({
     (e) => notes[e.source] && notes[e.target],
   );
   const selectedNote = selection.noteId ? notes[selection.noteId] : null;
+  const selectedCluster = selection.clusterId
+    ? clusters[selection.clusterId]
+    : null;
+
   const linkSource = linkSourceId ? notes[linkSourceId] : null;
   const editingNote = editingId ? notes[editingId] : null;
 
@@ -792,8 +807,6 @@ export default function BoardCanvas({
               zoomScale={view.scale}
               phase={phase}
               onSelect={(id) => onSelect({ type: "cluster", id })}
-              onVote={(id) => session.addVote(id, "cluster")}
-              onRemoveVote={(id) => session.removeVote(id)}
               onRenameRequest={(id) => {
                 setRenamingClusterId(id);
                 setRenameDraft(clusters[id]?.name ?? "");
@@ -917,8 +930,6 @@ export default function BoardCanvas({
                 linkActive={!!linkSourceId}
                 onMeasure={handleMeasure}
                 onSelect={(id) => onSelect({ type: "note", id })}
-                onVote={(id) => session.addVote(id, "note")}
-                onRemoveVote={(id) => session.removeVote(id)}
                 onEditRequest={editNote}
                 onDragStartNote={noteDrag.onDragStartNote}
                 onDragMoveNote={noteDrag.onDragMoveNote}
@@ -1006,13 +1017,76 @@ export default function BoardCanvas({
             session.deleteNote(id);
             onSelect(null);
           }}
-          onVote={(id) => session.addVote(id, "note")}
-          onRemoveVote={(id) => session.removeVote(id)}
-          onLinkStart={(id) => setLinkSourceId(id)}
           viewportWidth={size.width}
           viewportHeight={size.height}
+          onVote={(id) => {
+            const note = notes[id];
+            if (!canVoteOnNote(note)) return;
+            session.addVote(id, "note");
+          }}
+          onRemoveVote={(id) => session.removeVote(id)}
+          onLinkStart={(id) => setLinkSourceId(id)}
         />
       )}
+
+      {phase === "converge" &&
+        selectedCluster &&
+        !linkSourceId &&
+        !renamingClusterId && (
+          <div
+            className="panel absolute z-20 flex max-w-[calc(100%-1rem)] items-center gap-1.5 rounded-2xl border border-line bg-surface-raised/95 p-2 shadow-xl shadow-black/20 backdrop-blur-xl"
+            style={{
+              left: Math.max(
+                8,
+                Math.min(
+                  selectedCluster.x * view.scale + view.x,
+                  size.width - 240,
+                ),
+              ),
+              top: Math.max(8, selectedCluster.y * view.scale + view.y - 8),
+              transform: "translateY(-100%)",
+            }}
+            onMouseDown={(e) => e.stopPropagation()}
+          >
+            <span className="max-w-32 truncate px-2 text-xs font-semibold text-ink">
+              {selectedCluster.name || "Untitled cluster"}
+            </span>
+
+            <span className="whitespace-nowrap px-1 text-xs text-dim">
+              {perCluster[selectedCluster.id] ?? 0} votes
+            </span>
+
+            <button
+              type="button"
+              disabled={!canVoteOnCluster(selectedCluster)}
+              className="inline-flex min-h-9 shrink-0 items-center justify-center rounded-lg border border-line bg-surface-hover px-2.5 text-xs font-medium text-ink transition-colors hover:border-accent/30 hover:bg-accent/10 sm:min-h-8 sm:px-2"
+              onClick={() => {
+                if (!canVoteOnCluster(selectedCluster)) return;
+                session.addVote(selectedCluster.id, "cluster");
+              }}
+            >
+              Add dot
+            </button>
+
+            <button
+              type="button"
+              disabled={(myVotes[selectedCluster.id] ?? 0) === 0}
+              className="inline-flex min-h-9 shrink-0 items-center justify-center rounded-lg border border-line bg-surface-hover px-2.5 text-xs font-medium text-ink transition-colors hover:border-accent/30 hover:bg-accent/10 disabled:cursor-not-allowed disabled:opacity-40 sm:min-h-8 sm:px-2"
+              onClick={() => session.removeVote(selectedCluster.id)}
+            >
+              Remove dot
+            </button>
+
+            <button
+              type="button"
+              aria-label="Close cluster toolbar"
+              className="grid size-8 shrink-0 place-items-center rounded-lg text-dim transition-colors hover:bg-surface-4 hover:text-ink"
+              onClick={() => onSelect(null)}
+            >
+              ✕
+            </button>
+          </div>
+        )}
 
       {renamingCluster && (
         <input
@@ -1042,7 +1116,7 @@ export default function BoardCanvas({
       {!linkSourceId && (
         <div className="panel pointer-events-none absolute left-3 top-3 z-10 hidden max-w-64 px-3 py-1.5 text-xs text-dim sm:block">
           {phase === "converge"
-            ? "Click a note or cluster to drop a dot. Right-click takes one back."
+            ? "Select a note or cluster to open its voting controls. Use Add dot or Remove dot to vote."
             : phase === "cluster"
               ? "Drag notes together. Double-click empty space for a note, or create a cluster below."
               : "Double-click to add a note. Select a note and press Link to connect it. N for a new note, Ctrl+K for commands."}

@@ -3,16 +3,14 @@ import { Circle, Group, Rect, Text } from "react-konva";
 export default function ClusterShape({
   cluster,
   noteCount,
-  voteCount,
-  glow,
+  voteCount = 0,
+  glow = 0,
   selected,
   draggable,
-  semantic, // true when zoomed out past the semantic threshold
+  semantic,
   zoomScale,
   phase,
   onSelect,
-  onVote,
-  onRemoveVote,
   onRenameRequest,
   onDeleteRequest,
   onDragMoveCluster,
@@ -20,10 +18,15 @@ export default function ClusterShape({
 }) {
   const hex = cluster.color ?? "#7aa2ff";
 
+  // Selecting a cluster must never cast a vote.
   const handleClick = (e) => {
     e.cancelBubble = true;
-    onSelect(cluster.id);
-    if (phase === "converge") onVote(cluster.id);
+    onSelect?.(cluster.id);
+  };
+
+  const handleContextMenu = (e) => {
+    e.evt.preventDefault();
+    e.cancelBubble = true;
   };
 
   if (semantic) {
@@ -32,17 +35,14 @@ export default function ClusterShape({
       Math.min(70 + 12 * Math.sqrt(Math.max(noteCount, 1)), 150) * inv;
     const cx = cluster.x + cluster.width / 2;
     const cy = cluster.y + cluster.height / 2;
+
     return (
       <Group
         x={cx}
         y={cy}
         onClick={handleClick}
         onTap={handleClick}
-        onContextMenu={(e) => {
-          e.evt.preventDefault();
-          e.cancelBubble = true;
-          if (phase === "converge") onRemoveVote(cluster.id);
-        }}
+        onContextMenu={handleContextMenu}
         onMouseEnter={(e) => {
           const stage = e.target.getStage();
           if (stage) stage.container().style.cursor = "pointer";
@@ -61,6 +61,7 @@ export default function ClusterShape({
           shadowBlur={(20 + glow * 60) * inv}
           shadowOpacity={0.5 + glow * 0.5}
         />
+
         <Text
           text={(cluster.name || "UNTITLED CLUSTER").toUpperCase()}
           x={-radius}
@@ -71,8 +72,13 @@ export default function ClusterShape({
           fontStyle="bold"
           fill="#f8fafc"
         />
+
         <Text
-          text={`${noteCount} note${noteCount === 1 ? "" : "s"}${voteCount > 0 ? ` · ${voteCount} vote${voteCount === 1 ? "" : "s"}` : ""}`}
+          text={`${noteCount} note${noteCount === 1 ? "" : "s"}${
+            voteCount > 0
+              ? ` · ${voteCount} vote${voteCount === 1 ? "" : "s"}`
+              : ""
+          }`}
           x={-radius}
           y={10 * inv}
           width={radius * 2}
@@ -89,27 +95,26 @@ export default function ClusterShape({
       x={cluster.x}
       y={cluster.y}
       draggable={draggable}
-      onDragMove={(e) => onDragMoveCluster(cluster, e.target.x(), e.target.y())}
-      onDragEnd={(e) => onDragEndCluster(cluster, e.target.x(), e.target.y())}
+      onDragMove={(e) =>
+        onDragMoveCluster?.(cluster, e.target.x(), e.target.y())
+      }
+      onDragEnd={(e) => onDragEndCluster?.(cluster, e.target.x(), e.target.y())}
       onClick={handleClick}
       onTap={handleClick}
       onDblClick={(e) => {
         e.cancelBubble = true;
-        onRenameRequest(cluster.id);
+        onRenameRequest?.(cluster.id);
       }}
       onDblTap={(e) => {
         e.cancelBubble = true;
-        onRenameRequest(cluster.id);
+        onRenameRequest?.(cluster.id);
       }}
-      onContextMenu={(e) => {
-        e.evt.preventDefault();
-        e.cancelBubble = true;
-        if (phase === "converge") onRemoveVote(cluster.id);
-      }}
+      onContextMenu={handleContextMenu}
       onMouseEnter={(e) => {
         const stage = e.target.getStage();
-        if (stage)
+        if (stage) {
           stage.container().style.cursor = draggable ? "grab" : "pointer";
+        }
       }}
       onMouseLeave={(e) => {
         const stage = e.target.getStage();
@@ -128,6 +133,7 @@ export default function ClusterShape({
         shadowBlur={glow > 0 ? 10 + glow * 30 : 6}
         shadowOpacity={glow > 0 ? 0.3 + glow * 0.5 : 0.25}
       />
+
       <Text
         text={(cluster.name || "UNTITLED CLUSTER").toUpperCase()}
         x={14}
@@ -138,8 +144,13 @@ export default function ClusterShape({
         letterSpacing={1.5}
         fill={hex}
       />
+
       <Text
-        text={`${noteCount} note${noteCount === 1 ? "" : "s"}${voteCount > 0 ? ` · ${voteCount} vote${voteCount === 1 ? "" : "s"}` : ""}`}
+        text={`${noteCount} note${noteCount === 1 ? "" : "s"}${
+          voteCount > 0
+            ? ` · ${voteCount} vote${voteCount === 1 ? "" : "s"}`
+            : ""
+        }`}
         x={14}
         y={cluster.height - 22}
         width={cluster.width - 28}
@@ -147,18 +158,17 @@ export default function ClusterShape({
         fill="#94a3b8"
       />
 
-      {/* delete handle */}
       {selected && phase === "cluster" && (
         <Group
           x={cluster.width - 6}
           y={6}
           onClick={(e) => {
             e.cancelBubble = true;
-            onDeleteRequest(cluster.id);
+            onDeleteRequest?.(cluster.id);
           }}
           onTap={(e) => {
             e.cancelBubble = true;
-            onDeleteRequest(cluster.id);
+            onDeleteRequest?.(cluster.id);
           }}
           onMouseEnter={(e) => {
             const stage = e.target.getStage();
@@ -183,7 +193,6 @@ export default function ClusterShape({
         </Group>
       )}
 
-      {/* vote badge */}
       {voteCount > 0 && (
         <Group x={cluster.width / 2} y={-8}>
           <Circle

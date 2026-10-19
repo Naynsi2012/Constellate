@@ -644,7 +644,7 @@ export function registerRoomHandlers(io, socket) {
       };
       room.votes.push(vote);
 
-      socket.to(room.roomId).emit("vote:added", voteCounts(room));
+      io.to(room.roomId).emit("vote:added", voteCounts(room));
       scheduleSave(room);
       reply({ ok: true, vote });
     }),
@@ -665,7 +665,7 @@ export function registerRoomHandlers(io, socket) {
         const vote = room.votes[i];
         if (vote.userId === ctx.userId && vote.targetId === p.targetId) {
           room.votes.splice(i, 1);
-          socket.to(room.roomId).emit("vote:removed", voteCounts(room));
+          io.to(room.roomId).emit("vote:removed", voteCounts(room));
           scheduleSave(room);
           return reply({ ok: true, vote });
         }

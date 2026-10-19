@@ -1,4 +1,3 @@
-
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Circle, Group, Rect, Text } from "react-konva";
 import { FONTS } from "../noteStyles";
@@ -18,13 +17,10 @@ export default function NoteShape({
   linkActive,
   onMeasure,
   onSelect,
-  onVote,
-  onRemoveVote,
   onEditRequest,
   onDragStartNote,
   onDragMoveNote,
   onDragEndNote,
-  onLinkStart,
   onLinkComplete,
   onHover,
 }) {
@@ -37,10 +33,7 @@ export default function NoteShape({
 
   const height = Math.max(
     MIN_HEIGHT,
-    textHeight +
-      NOTE_PAD * 2 +
-      (author ? 14 : 0) +
-      (isQuestion ? 18 : 0),
+    textHeight + NOTE_PAD * 2 + (author ? 14 : 0) + (isQuestion ? 18 : 0),
   );
 
   useLayoutEffect(() => {
@@ -48,9 +41,7 @@ export default function NoteShape({
     if (!node) return;
 
     const nextHeight = node.height();
-    setTextHeight((current) =>
-      current === nextHeight ? current : nextHeight,
-    );
+    setTextHeight((current) => (current === nextHeight ? current : nextHeight));
   }, [note.text, note.fontSize, note.fontFamily, width]);
 
   useEffect(() => {
@@ -84,10 +75,6 @@ export default function NoteShape({
     }
 
     onSelect?.(note.id);
-
-    if (phase === "converge" && !isQuestion) {
-      onVote?.(note.id);
-    }
   };
 
   const handleDoubleClick = (e) => {
@@ -101,10 +88,6 @@ export default function NoteShape({
   const handleContextMenu = (e) => {
     e.evt.preventDefault();
     e.cancelBubble = true;
-
-    if (phase === "converge" && !isQuestion) {
-      onRemoveVote?.(note.id);
-    }
   };
 
   return (
@@ -179,7 +162,7 @@ export default function NoteShape({
 
       <Text
         ref={textRef}
-        text={note.text || "…"}
+        text={note.text ?? ""}
         x={NOTE_PAD}
         y={NOTE_PAD + (isQuestion ? 14 : 0)}
         width={width - NOTE_PAD * 2}

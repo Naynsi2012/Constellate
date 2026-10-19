@@ -4,6 +4,60 @@
 
 The workflow is designed around four steps: **Lobby → Diverge → Cluster → Converge → Results/Export**.
 
+## How to use Constellate
+
+Constellate guides your team through a structured brainstorming session from generating ideas to identifying priorities.
+
+## 1. Create/Join a Room
+- Create or Join a room through room id
+- Optionally, enter a question to guide the brainstorming session
+- Share the room link with your teammates so they can join the same session
+
+The room host can guide the team through the brainstorming phases.
+
+## 2. Diverge (Generate Ideas)
+
+In this phase, participants can contribute ideas to shared canvas.
+
+- Create sticky notes and write your ideas on them.
+- Move notes around the canvas to organize your workspace.
+- Use zoom and pan to navigate the board.
+- Contribute adding ideas while other participants contribute in real time.
+
+Authors are hidden during this phase so participants can focus on ideas rather than who suggested them.
+
+## 3. Cluster (Group related ideas)
+
+Once everyone has contributed ideas, organize them into meaningful groups.
+
+- Identify notes that discuss similar topics.
+- Group related notes into clusters.
+- Give each cluster a descriptive name.
+- Use connectors to show relationships between ideas.
+
+When zoomed out, clusters appear as summary bubbles, making larger boards easier to navigate.
+
+## 4. Converge (Vote on ideas)
+
+In this phase, participants vote on ideas and clusters they consider most valuable.
+
+- Review the notes and clusters on the board.
+- Use your available vote dots to support important ideas.
+- Distribute your votes according to your priorities.
+- Observe the voting indicators to see which ideas receive the most support.
+
+Ideas with stronger voting support receive greater visual emphasis, helping the team identify popular suggestions and shared priorities.
+
+## 5. Results
+
+After the Converge phase begins, open the Results page to review the outcome of the brainstorming session.
+
+- Review the ranked ideas and clusters.
+- Identify the suggestions that received the most votes.
+- Use the export option to download the results as a Markdown (.md) file.
+
+The exported file can be saved, shared with teammates or used in meeting notes, project, documentation and future planning.
+
 ## Features
 
 - **Shared brainstorming canvas** — create, edit, move, and style notes on a zoomable canvas.
