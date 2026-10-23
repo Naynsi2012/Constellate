@@ -1,12 +1,18 @@
 # Constellate
 
-**Constellate** is a collaborative brainstorming canvas that helps teams turn individual ideas into shared priorities. Participants add notes, group related ideas into clusters, vote on the most important ideas, and export the results.
+**Constellate** is a collaborative brainstorming canvas that helps teams turn individual ideas into shared thoughts. Participants add notes, group related ideas into clusters, vote on the most important ideas, and export the results. This helps in improving overall efficiency and quality of work and save time for group projects.
 
-The workflow is designed around four steps: **Lobby → Diverge → Cluster → Converge → Results/Export**.
+**Theme: COLLABORATION**
+
+## Reason to choose this Theme
+
+The main reason to select this theme was to create a collaborative platform to ensure efficient working without the distraction of online projects. I have been struggling to find a place for collaboration platform without ads and suscriptions.
 
 ## How to use Constellate
 
 Constellate guides your team through a structured brainstorming session from generating ideas to identifying priorities.
+
+The workflow is designed around four steps: **Lobby → Diverge → Cluster → Converge → Results/Export**.
 
 ## 1. Create/Join a Room
 - Create or Join a room through room id
