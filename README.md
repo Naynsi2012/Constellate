@@ -208,3 +208,11 @@ AI assistance was used during development as a support tool for implementation, 
 - **Project setup** — clarifying environment configuration and how the frontend API and backend server communicate.
 
 AI suggestions were reviewed and adapted during implementation. The project’s final behavior should be validated through local testing, particularly for multi-user synchronization and phase permissions.
+
+## PROJECT SCREENSHOTS:
+<img width="1469" height="882" alt="Screenshot 2026-10-24 at 1 47 54 AM" src="https://github.com/user-attachments/assets/e3dbde7f-bb6f-48ed-b4cb-1bd9ec7f4260" />
+<img width="1469" height="882" alt="Screenshot 2026-10-24 at 1 48 54 AM" src="https://github.com/user-attachments/assets/e745ac4f-1251-44ab-ac74-1eb4f8889f42" />
+<img width="1469" height="882" alt="Screenshot 2026-10-24 at 1 46 24 AM" src="https://github.com/user-attachments/assets/6b471c96-7f68-42ae-b072-36801b6bba2f" />
+<img width="1469" height="882" alt="Screenshot 2026-10-24 at 1 46 58 AM" src="https://github.com/user-attachments/assets/4784d365-14a9-4da0-b039-77db35555df5" />
+<img width="1469" height="882" alt="Screenshot 2026-10-24 at 1 49 16 AM" src="https://github.com/user-attachments/assets/bede395b-76fd-4623-842e-617ae421e9f3" />
+
