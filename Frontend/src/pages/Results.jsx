@@ -366,7 +366,7 @@ export default function Results() {
                         </p>
                       </div>
 
-                      <div className="shrink-0 text-right">
+                      <div className="shrink-0 text-center">
                         <p className="text-lg font-semibold tabular-nums text-ink">
                           {cluster.votes ?? 0}
                         </p>
@@ -443,7 +443,7 @@ export default function Results() {
                           </div>
                         </div>
 
-                        <div className="shrink-0 rounded-xl border border-line bg-surface-raised px-3 py-2 text-right">
+                        <div className="shrink-0 rounded-xl border border-line bg-surface-raised px-3 py-2 text-center">
                           <p className="text-lg font-semibold leading-none tabular-nums text-ink">
                             {note.votes ?? 0}
                           </p>
@@ -465,18 +465,6 @@ export default function Results() {
             </ol>
           )}
         </section>
-
-        {/* Footer */}
-        <footer className="flex flex-col gap-3 border-t border-line pt-5 text-xs text-faint sm:flex-row sm:items-center sm:justify-between">
-          <p>Made for better ideas, together.</p>
-          <Link
-            to="/"
-            className="inline-flex min-h-9 items-center gap-2 self-start text-dim transition-colors hover:text-accent sm:self-auto"
-          >
-            Start a new session
-            <span aria-hidden="true">↗</span>
-          </Link>
-        </footer>
       </div>
     </main>
   );

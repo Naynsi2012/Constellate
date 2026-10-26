@@ -113,6 +113,7 @@ select {
 button {
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
+  cursor: pointer;
 }
 
 button:disabled {

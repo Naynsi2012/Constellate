@@ -191,7 +191,7 @@ function NoteToolbar({
   const bigger = FONT_SIZES[Math.min(FONT_SIZES.length - 1, sizeIndex + 1)];
 
   const btn =
-    "inline-flex min-h-9 shrink-0 items-center justify-center rounded-lg border border-line bg-surface-hover px-2.5 text-xs font-medium text-ink transition-colors hover:border-accent/30 hover:bg-accent/10 disabled:opacity-40 sm:min-h-8 sm:px-2";
+    "inline-flex min-h-9 shrink-0 items-center justify-center rounded-lg border border-line bg-surface-hover px-2.5 text-xs! font-medium text-ink transition-colors hover:border-accent/30 hover:bg-accent/10 disabled:opacity-40 sm:min-h-8 sm:px-2";
 
   return (
     <div
@@ -237,14 +237,14 @@ function NoteToolbar({
               <span className="mx-1 h-4 w-px bg-line" />
               <select
                 aria-label="Font"
-                className="cursor-pointer rounded-lg border border-line bg-surface-3 px-1 py-1 text-xs text-ink outline-none"
+                className="cursor-pointer rounded-lg border border-line bg-surface-3 px-1 py-1 text-xs! text-ink outline-none"
                 value={note.fontFamily ?? "sans"}
                 onChange={(e) =>
                   onStyleChange(note.id, { fontFamily: e.target.value })
                 }
               >
                 {Object.entries(FONTS).map(([key, { label }]) => (
-                  <option key={key} value={key} className="text-slate-900">
+                  <option key={key} value={key} className="text-ink">
                     {label}
                   </option>
                 ))}
@@ -899,11 +899,6 @@ export default function BoardCanvas({
                   y={note.y + 40}
                   radius={(isQuestion ? 8 : 4) * inv}
                   fill={isQuestion ? "#ffd166" : note.color}
-                  shadowColor={
-                    isQuestion ? "#ffd166" : glow > 0 ? "#ffd166" : note.color
-                  }
-                  shadowBlur={(isQuestion ? 20 : 6 + glow * 20) * inv}
-                  shadowOpacity={0.9}
                   listening={false}
                 />
               );
@@ -1175,7 +1170,7 @@ export default function BoardCanvas({
           aria-label="Fit board"
           onClick={fitView}
           title="Fit everything"
-          className="grid size-9 place-items-center rounded-xl text-[10px] font-semibold text-dim transition-colors hover:bg-surface-hover hover:text-ink sm:size-8"
+          className="grid size-9 place-items-center rounded-xl text-[12px]! font-semibold text-dim transition-colors hover:bg-surface-hover hover:text-ink sm:size-8"
         >
           Fit
         </button>

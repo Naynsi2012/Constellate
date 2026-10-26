@@ -141,9 +141,6 @@ export default function NoteShape({
         cornerRadius={12}
         stroke={strokeColor}
         strokeWidth={selected ? 2 : isQuestion ? 1.5 : glow > 0 ? 1.5 : 1}
-        shadowColor={glow > 0 ? "#ffd166" : "#000000"}
-        shadowBlur={glow > 0 ? 8 + glow * 26 : 18}
-        shadowOpacity={glow > 0 ? Math.min(1, 0.4 + glow * 0.55) : 0.3}
         shadowOffsetY={6}
       />
 
@@ -189,9 +186,6 @@ export default function NoteShape({
           <Circle
             radius={12}
             fill="#ffd166"
-            shadowColor="#ffd166"
-            shadowBlur={10 + glow * 22}
-            shadowOpacity={0.85}
             stroke="rgba(15, 23, 42, 0.6)"
             strokeWidth={1}
           />

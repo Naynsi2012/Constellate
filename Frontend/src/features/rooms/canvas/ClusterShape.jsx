@@ -57,9 +57,6 @@ export default function ClusterShape({
           fill={`${hex}33`}
           stroke={hex}
           strokeWidth={(selected ? 3 : 1.5) * inv}
-          shadowColor={glow > 0 ? "#ffd166" : hex}
-          shadowBlur={(20 + glow * 60) * inv}
-          shadowOpacity={0.5 + glow * 0.5}
         />
 
         <Text
@@ -129,9 +126,6 @@ export default function ClusterShape({
         strokeWidth={selected ? 2.5 : 1.5}
         dash={[8, 6]}
         cornerRadius={16}
-        shadowColor={glow > 0 ? "#ffd166" : hex}
-        shadowBlur={glow > 0 ? 10 + glow * 30 : 6}
-        shadowOpacity={glow > 0 ? 0.3 + glow * 0.5 : 0.25}
       />
 
       <Text
@@ -198,9 +192,6 @@ export default function ClusterShape({
           <Circle
             radius={13}
             fill="#ffd166"
-            shadowColor="#ffd166"
-            shadowBlur={8 + glow * 20}
-            shadowOpacity={0.8}
             stroke="#0f172a"
             strokeWidth={1}
           />

@@ -152,9 +152,6 @@ export default function RoomHeader({
           onClick={copyInvite}
           className="flex min-h-10 items-center gap-2 rounded-lg border border-line bg-surface-raised px-3 text-left text-xs font-medium text-ink transition-colors hover:bg-surface-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
         >
-          <span aria-hidden="true" className="text-dim">
-            ↗
-          </span>
           {copied ? "Invite link copied" : "Share invite"}
         </button>
 
@@ -163,9 +160,6 @@ export default function RoomHeader({
           onClick={() => setMenuOpen(false)}
           className="flex min-h-10 items-center gap-2 rounded-lg border border-line bg-surface-raised px-3 text-xs font-medium text-ink transition-colors hover:bg-surface-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
         >
-          <span aria-hidden="true" className="text-dim">
-            ↗
-          </span>
           View results
         </Link>
 
@@ -174,9 +168,6 @@ export default function RoomHeader({
           onClick={() => setMenuOpen(false)}
           className="flex min-h-10 items-center gap-2 rounded-lg border border-line bg-surface-raised px-3 text-xs font-medium text-ink transition-colors hover:bg-surface-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
         >
-          <span aria-hidden="true" className="text-dim">
-            +
-          </span>
           Create a new room
         </Link>
       </div>
@@ -243,7 +234,7 @@ export default function RoomHeader({
           <button
             type="button"
             onClick={copyInvite}
-            className="inline-flex min-h-8 items-center gap-1.5 rounded-lg border border-line bg-surface-raised px-2.5 text-[11px] font-medium text-ink transition-colors hover:bg-surface-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent sm:px-3 sm:text-xs"
+            className="inline-flex min-h-8 items-center gap-1.5 rounded-lg border border-line bg-surface-raised px-2.5 text-xs! font-medium text-ink transition-colors hover:bg-surface-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent sm:px-3 sm:text-xs"
           >
             <span aria-hidden="true">↗</span>
             {copied ? "Copied" : "Copy invite"}

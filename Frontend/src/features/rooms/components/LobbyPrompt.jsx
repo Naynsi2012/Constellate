@@ -29,12 +29,11 @@ export default function LobbyPrompt({ isHost, onSubmit }) {
           >
             <div className="mb-6">
               <h2 className="text-2xl font-semibold tracking-tight text-ink sm:text-3xl">
-                What problem are we solving?
+                What are we working on?
               </h2>
 
               <p className="mt-3 text-sm leading-6 text-dim">
-                Start with a clear question. It becomes the anchor for your
-                board and the heading for your session results.
+                Add a question for your group to work on.
               </p>
             </div>
 
@@ -42,7 +41,7 @@ export default function LobbyPrompt({ isHost, onSubmit }) {
               htmlFor="session-question"
               className="mb-2 block text-xs font-medium text-ink"
             >
-              Your session question
+              Your question
             </label>
 
             <textarea
@@ -57,7 +56,7 @@ export default function LobbyPrompt({ isHost, onSubmit }) {
             />
 
             <div className="mt-2 flex items-center justify-between text-[11px] text-faint">
-              <span>Keep it specific and open-ended.</span>
+              <span>Keep it short and clear.</span>
               <span>{question.length}/200</span>
             </div>
 
@@ -71,7 +70,7 @@ export default function LobbyPrompt({ isHost, onSubmit }) {
             </button>
 
             <p className="mt-4 text-center text-[11px] leading-5 text-faint">
-              You can move through the phases as your group develops ideas.
+              You can change the session phase later.
             </p>
           </form>
         ) : (
@@ -92,11 +91,6 @@ export default function LobbyPrompt({ isHost, onSubmit }) {
               The host is preparing the session question. The board will be
               ready as soon as they start.
             </p>
-
-            <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-line bg-surface-raised px-3 py-2 text-xs text-faint">
-              <span className="size-1.5 animate-pulse rounded-full bg-accent" />
-              Waiting for the host
-            </div>
           </div>
         )}
       </div>

@@ -27,18 +27,17 @@ const WORD_SIZE = "0.85em"; // same size for every word, so nothing shifts
 
 const STEPS = [
   {
-    title: "Think on your own first",
-    description:
-      "Everyone adds ideas quietly, so the best one wins, not the loudest voice.",
+    title: "Add your ideas",
+    description: "Write down your ideas and let everyone add theirs.",
   },
   {
-    title: "Group what belongs together",
-    description: "Pull related notes into clusters and name the themes.",
+    title: "Group similar ideas",
+    description: "Move related notes together and give each group a name.",
   },
   {
-    title: "Vote on what matters",
+    title: "Pick the best ideas",
     description:
-      "Everyone gets a few votes. The top ideas rise to the surface.",
+      "Vote for the ideas you like most and see which ones get the most votes.",
   },
 ];
 
@@ -160,24 +159,6 @@ export default function LandingPage() {
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-canvas font-body text-ink">
-      <div
-        className="pointer-events-none absolute inset-0 z-0"
-        aria-hidden="true"
-      >
-        <div className="bg-fallback absolute inset-0" />
-        <video
-          className="absolute inset-0 h-full w-full object-cover opacity-60"
-          src="/background.mp4"
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="auto"
-        />
-        <div className="absolute inset-0 bg-linear-to-r from-canvas/90 via-canvas/55 to-canvas/30" />
-        <div className="absolute inset-0 bg-linear-to-t from-canvas via-transparent to-canvas/60" />
-      </div>
-
       <div className="relative z-10 flex min-h-screen flex-col">
         <header className="mx-auto flex w-full max-w-7xl items-center justify-between px-5 py-7 sm:px-8">
           <Link
@@ -190,7 +171,7 @@ export default function LandingPage() {
           <button
             type="button"
             onClick={() => setModal("create")}
-            className="rounded-full border border-white/20 bg-white/10 px-5 py-2 text-sm font-medium text-ink backdrop-blur transition-colors hover:bg-white/20"
+            className="rounded-full border border-line bg-surface-raised px-5 py-2 text-sm font-medium text-ink transition-colors hover:bg-surface-hover"
           >
             Get started
           </button>
@@ -241,7 +222,7 @@ export default function LandingPage() {
             <button
               type="button"
               onClick={() => setModal("join")}
-              className="group flex items-center justify-between rounded-2xl border border-white/25 bg-white/5 px-6 py-5 text-lg font-semibold text-ink backdrop-blur transition-colors hover:border-white/50 hover:bg-white/10"
+              className="group flex items-center justify-between rounded-2xl border border-line bg-surface-raised px-6 py-5 text-lg font-semibold text-ink transition-colors hover:bg-surface-hover"
             >
               Join a room
               <span
@@ -258,19 +239,12 @@ export default function LandingPage() {
             </p>
           </section>
         </div>
-
-        <footer className="px-5 py-6 sm:px-8">
-          <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-2 text-xs text-faint">
-            <span>Constellate</span>
-            <span>From scattered thoughts to shared direction.</span>
-          </div>
-        </footer>
       </div>
 
       {modal === "create" && (
         <Modal
           title="Create a room"
-          subtitle="Tell us who you are and what you're working on. You can share the link right after."
+          subtitle="Enter your name and what you want to discuss. You can invite others after creating the room."
           onClose={() => setModal(null)}
         >
           <form onSubmit={handleCreate} className="flex flex-col gap-5">
@@ -298,12 +272,12 @@ export default function LandingPage() {
                 htmlFor="question"
                 className="mb-2 block text-sm font-medium text-dim"
               >
-                What are we trying to solve?
+                What do you want to discuss?
                 <span className="ml-2 font-normal text-faint">Optional</span>
               </label>
               <textarea
                 id="question"
-                placeholder="How might we make our next launch better?"
+                placeholder="Ideas for our next project"
                 value={question}
                 maxLength={200}
                 rows={3}

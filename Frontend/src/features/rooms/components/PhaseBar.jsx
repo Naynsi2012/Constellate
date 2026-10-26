@@ -119,47 +119,34 @@ export default function PhaseBar({ room, you, session, compact = false }) {
             <span
               aria-current={state === "active" ? "step" : undefined}
               title={PHASE_LABELS[item]}
-              className={`flex items-center gap-2 rounded-lg border text-[11px] font-medium transition-colors ${
-                compact ? "min-h-9 w-full px-2.5" : "min-h-8 px-2 sm:px-2.5"
+              className={`flex items-center gap-2 border text-[14px] font-medium transition-colors duration-500 ease-in-out ${
+                compact
+                  ? "min-h-9 w-full rounded-lg px-2.5"
+                  : "min-h-8 rounded-md px-2 sm:px-2.5"
               } ${
                 state === "active"
-                  ? "border-accent/40 bg-accent/10 text-accent"
+                  ? "border-accent bg-accent text-accent-contrast"
                   : state === "done"
-                    ? "border-green-400/20 bg-green-400/5 text-green-300"
-                    : "border-line/70 bg-transparent text-faint"
+                    ? "border-line bg-surface-raised text-dim"
+                    : "border-transparent bg-transparent text-faint"
               }`}
             >
               <span
-                className={`grid size-5 shrink-0 place-items-center rounded-md text-[10px] ${
-                  state === "done"
-                    ? "bg-green-400/15 text-green-300"
-                    : state === "active"
-                      ? "bg-accent/20 text-accent"
-                      : "bg-surface-hover text-faint"
+                className={`flex size-5 shrink-0 items-center justify-center rounded text-[10px] leading-none transition-colors duration-500 ease-in-out ${
+                  state === "active"
+                    ? "bg-black/10 text-current"
+                    : state === "done"
+                      ? "bg-surface-hover text-dim"
+                      : "bg-transparent text-faint"
                 }`}
               >
                 {state === "done" ? "✓" : itemIndex + 1}
               </span>
 
-              <span className="min-w-0 flex-1 truncate">
+              <span className="min-w-0 flex-1 truncate font-normal">
                 {PHASE_LABELS[item]}
               </span>
-
-              {compact && state === "active" && (
-                <span className="shrink-0 text-[9px] uppercase tracking-wide text-accent">
-                  Current
-                </span>
-              )}
             </span>
-
-            {!compact && itemIndex < PHASES.length - 1 && (
-              <span
-                className={`h-px w-1.5 shrink-0 sm:w-2 ${
-                  itemIndex < index ? "bg-green-400/40" : "bg-line"
-                }`}
-                aria-hidden="true"
-              />
-            )}
           </li>
         );
       })}
@@ -176,7 +163,7 @@ export default function PhaseBar({ room, you, session, compact = false }) {
         <button
           type="button"
           onClick={() => session.setPhase(prev)}
-          className={`min-h-9 rounded-lg border border-line px-3 text-[11px] font-medium text-dim transition-colors hover:bg-surface-hover hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
+          className={`min-h-9 rounded-lg border border-line px-3 text-[14px] font-medium text-dim transition-colors hover:bg-surface-hover hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
             compact ? "w-full" : ""
           }`}
         >
@@ -189,7 +176,7 @@ export default function PhaseBar({ room, you, session, compact = false }) {
           type="button"
           onClick={() => session.setPhase(next)}
           title="Ctrl/Cmd + Enter"
-          className={`min-h-9 rounded-lg bg-accent px-3 text-[11px] font-semibold text-accent-contrast transition-colors hover:bg-accent-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
+          className={`min-h-9 rounded-lg bg-accent px-3 text-[14px] text-accent-contrast transition-colors hover:bg-accent-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
             compact ? "w-full" : ""
           }`}
         >
@@ -207,7 +194,7 @@ export default function PhaseBar({ room, you, session, compact = false }) {
         aria-expanded={showTimer}
         aria-haspopup="dialog"
         aria-label="Timer settings"
-        className={`inline-flex min-h-9 w-full items-center justify-center gap-2 rounded-lg border px-3 text-[11px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
+        className={`inline-flex min-h-9 w-full items-center justify-center gap-2 rounded-lg border px-3 text-[14px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
           showTimer
             ? "border-accent/40 bg-accent/10 text-accent"
             : "border-line bg-surface-raised text-dim hover:text-ink"
@@ -241,11 +228,11 @@ export default function PhaseBar({ room, you, session, compact = false }) {
             <div>
               <p
                 id={`${durationInputId}-title`}
-                className="text-xs font-semibold text-ink"
+                className="text-[14px] font-semibold text-ink"
               >
                 Session timer
               </p>
-              <p className="mt-1 text-[11px] leading-relaxed text-faint">
+              <p className="mt-1 text-[13px] leading-relaxed text-faint">
                 Set a time limit for the current activity.
               </p>
             </div>
@@ -272,13 +259,13 @@ export default function PhaseBar({ room, you, session, compact = false }) {
                       startTimer();
                     }
                   }}
-                  className="w-16 rounded-lg border border-line bg-canvas px-2 py-2 text-center text-xs text-ink outline-none focus:border-accent focus:ring-1 focus:ring-accent"
+                  className="w-16 rounded-lg border border-line bg-canvas px-2 py-2 text-center text-xs! text-ink outline-none focus:border-accent focus:ring-1 focus:ring-accent"
                 />
                 <span className="text-faint">min</span>
               </span>
             </label>
 
-            <p className="text-[10px] text-faint">
+            <p className="text-[12px] text-faint">
               Choose between 1 and 120 minutes.
             </p>
 
@@ -286,7 +273,7 @@ export default function PhaseBar({ room, you, session, compact = false }) {
               <button
                 type="button"
                 onClick={startTimer}
-                className="min-h-9 rounded-lg bg-accent px-2 text-xs font-semibold text-accent-contrast transition-colors hover:bg-accent-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                className="min-h-9 rounded-lg bg-accent px-2 text-xs! font-semibold text-accent-contrast transition-colors hover:bg-accent-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
               >
                 Start
               </button>
@@ -297,7 +284,7 @@ export default function PhaseBar({ room, you, session, compact = false }) {
                   session.timerPause();
                   setShowTimer(false);
                 }}
-                className="min-h-9 rounded-lg border border-line px-2 text-xs text-dim transition-colors hover:bg-surface-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                className="min-h-9 rounded-lg border border-line px-2 text-xs! text-dim transition-colors hover:bg-surface-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
               >
                 Pause
               </button>
@@ -308,7 +295,7 @@ export default function PhaseBar({ room, you, session, compact = false }) {
                   session.timerReset();
                   setShowTimer(false);
                 }}
-                className="min-h-9 rounded-lg border border-line px-2 text-xs text-dim transition-colors hover:bg-surface-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                className="min-h-9 rounded-lg border border-line px-2 text-xs! text-dim transition-colors hover:bg-surface-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
               >
                 Reset
               </button>
@@ -317,7 +304,7 @@ export default function PhaseBar({ room, you, session, compact = false }) {
             <button
               type="button"
               onClick={() => setShowTimer(false)}
-              className="self-end rounded px-2 py-1 text-[11px] text-faint hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              className="self-end rounded px-2 py-1 text-[12px]! text-faint hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
             >
               Close
             </button>
