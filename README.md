@@ -1,6 +1,8 @@
 # Constellate
 
-**Constellate** is a collaborative brainstorming canvas that helps teams turn individual ideas into shared thoughts. Participants add notes, group related ideas into clusters, vote on the most important ideas, and export the results. This helps in improving overall efficiency and quality of work and save time for group projects.
+It is a personal project with collaboration which is a canvas used for brainstorming session that helps in sharing ideas so that productive environment can be created.
+We can add notes, group ideas into clusters, vote on them, and export the results.
+This helps in improving overall efficiency and quality of work and save time for projects with multiple people.
 
 **Theme: COLLABORATION**
 
@@ -10,58 +12,50 @@ The main reason to select this theme was to create a collaborative platform to e
 
 ## How to use Constellate
 
-Constellate guides your team through a structured brainstorming session from generating ideas to identifying priorities.
-
-The workflow is designed around four steps: **Lobby → Diverge → Cluster → Converge → Results/Export**.
+**PHASES: Lobby → Diverge → Cluster → Converge → Results/Export**.
 
 ## 1. Create/Join a Room
-- Create or Join a room through room id
-- Optionally, enter a question to guide the brainstorming session
-- Share the room link with your teammates so they can join the same session
+
+Create or Join a room through room id then enter a question to guide the brainstorming session
+You can share the room link with your anybody to join the same session
 
 The room host can guide the team through the brainstorming phases.
 
-## 2. Diverge (Generate Ideas)
+## 2. Diverge
 
 In this phase, participants can contribute ideas to shared canvas.
 
-- Create sticky notes and write your ideas on them.
-- Move notes around the canvas to organize your workspace.
-- Use zoom and pan to navigate the board.
-- Contribute adding ideas while other participants contribute in real time.
+Create sticky notes to write your ideas.
+Move notes around the canvas and use zoom and pan to navigate the board.
 
 Authors are hidden during this phase so participants can focus on ideas rather than who suggested them.
 
-## 3. Cluster (Group related ideas)
+## 3. Cluster
 
-Once everyone has contributed ideas, organize them into meaningful groups.
+In this phase, once everyone has contributed ideas we can organize them.
 
-- Identify notes that discuss similar topics.
-- Group related notes into clusters.
-- Give each cluster a descriptive name.
-- Use connectors to show relationships between ideas.
+Group the notes into clusters with special name.
+Use connectors to show relationships between ideas.
 
 When zoomed out, clusters appear as summary bubbles, making larger boards easier to navigate.
 
-## 4. Converge (Vote on ideas)
+## 4. Converge
 
-In this phase, participants vote on ideas and clusters they consider most valuable.
+In this phase, we vote on ideas and clusters they consider most valuable.
 
-- Review the notes and clusters on the board.
-- Use your available vote dots to support important ideas.
-- Distribute your votes according to your priorities.
-- Observe the voting indicators to see which ideas receive the most support.
+Review the notes and clusters on the board and use your available vote dots to support important ideas.
+Distribute your votes according to your priorities.
+Observe the voting indicators to see which ideas receive the most support.
 
 Ideas with stronger voting support receive greater visual emphasis, helping the team identify popular suggestions and shared priorities.
 
 ## 5. Results
 
-After the Converge phase begins, open the Results page to review the outcome of the brainstorming session.
+After the Converge phase begins, we can open the Results page to get result.
 
-- Review the ranked ideas and clusters.
-- Identify the suggestions that received the most votes.
-- Use the export option to download the results as a Markdown (.md) file.
+- Review the ranked ideas and clusters and see for the best one.
 
+We can use the export option to download the results as a Markdown (.md) file.
 The exported file can be saved, shared with teammates or used in meeting notes, project, documentation and future planning.
 
 ## Features
@@ -210,9 +204,8 @@ AI assistance was used during development as a support tool for implementation, 
 AI suggestions were reviewed and adapted during implementation. The project’s final behavior should be validated through local testing, particularly for multi-user synchronization and phase permissions.
 
 ## PROJECT SCREENSHOTS:
-<img width="1469" height="882" alt="Screenshot 2026-10-24 at 1 47 54 AM" src="https://github.com/user-attachments/assets/e3dbde7f-bb6f-48ed-b4cb-1bd9ec7f4260" />
-<img width="1469" height="882" alt="Screenshot 2026-10-24 at 1 48 54 AM" src="https://github.com/user-attachments/assets/e745ac4f-1251-44ab-ac74-1eb4f8889f42" />
-<img width="1469" height="882" alt="Screenshot 2026-10-24 at 1 46 24 AM" src="https://github.com/user-attachments/assets/6b471c96-7f68-42ae-b072-36801b6bba2f" />
-<img width="1469" height="882" alt="Screenshot 2026-10-24 at 1 46 58 AM" src="https://github.com/user-attachments/assets/4784d365-14a9-4da0-b039-77db35555df5" />
-<img width="1469" height="882" alt="Screenshot 2026-10-24 at 1 49 16 AM" src="https://github.com/user-attachments/assets/bede395b-76fd-4623-842e-617ae421e9f3" />
+<img width="1456" height="763" alt="Screenshot 2026-10-30 at 3 07 31 AM" src="https://github.com/user-attachments/assets/8dc2e312-38ef-4c18-8ecc-19cce9686453" />
+<img width="1456" height="763" alt="Screenshot 2026-10-30 at 3 07 24 AM" src="https://github.com/user-attachments/assets/82c1da79-1728-40c2-ac08-911ca62346e3" />
+<img width="1456" height="763" alt="Screenshot 2026-10-30 at 3 10 33 AM" src="https://github.com/user-attachments/assets/60821963-8cf1-4b4f-b426-cb12d7af344e" />
+<img width="1456" height="763" alt="Screenshot 2026-10-30 at 3 10 11 AM" src="https://github.com/user-attachments/assets/6e0a6dfb-7c1d-47a7-a0dd-0d9f85431d50" />
 
