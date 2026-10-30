@@ -58,6 +58,10 @@ After the Converge phase begins, we can open the Results page to get result.
 We can use the export option to download the results as a Markdown (.md) file.
 The exported file can be saved, shared with teammates or used in meeting notes, project, documentation and future planning.
 
+## Note:
+
+Please test this project on google chrome and safari. Due to security reason some link do not open on Brave.
+
 ## Features
 
 - **Shared brainstorming canvas** — create, edit, move, and style notes on a zoomable canvas.
