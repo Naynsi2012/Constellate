@@ -4,6 +4,10 @@ It is a personal project with collaboration which is a canvas used for brainstor
 We can add notes, group ideas into clusters, vote on them, and export the results.
 This helps in improving overall efficiency and quality of work and save time for projects with multiple people.
 
+## Note:
+
+Please test this project on google chrome and safari. Due to some reason the project does not open on Brave and other browsers sometimes.
+
 **Theme: COLLABORATION**
 
 ## Reason to choose this Theme
@@ -58,9 +62,6 @@ After the Converge phase begins, we can open the Results page to get result.
 We can use the export option to download the results as a Markdown (.md) file.
 The exported file can be saved, shared with teammates or used in meeting notes, project, documentation and future planning.
 
-## Note:
-
-Please test this project on google chrome and safari. Due to security reason some link do not open on Brave.
 
 ## Features
 
