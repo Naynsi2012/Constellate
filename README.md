@@ -1,67 +1,39 @@
 # Constellate
-
-It is a personal project with collaboration which is a canvas used for brainstorming session that helps in sharing ideas so that productive environment can be created.
-We can add notes, group ideas into clusters, vote on them, and export the results.
-This helps in improving overall efficiency and quality of work and save time for projects with multiple people.
+A personal brainstorming canvas project for sharing ideas and collaborating with friends.
 
 ## Note:
-
 Please test this project on google chrome and safari. Due to some reason the project does not open on Brave and other browsers sometimes.
 
-**Theme: COLLABORATION**
+## Theme
+I chose collaboration theme
 
-## Reason to choose this Theme
+### Reason to choose this Theme
 
-The main reason to select this theme was to create a collaborative platform to ensure efficient working without the distraction of online projects. I have been struggling to find a place for collaboration platform without ads and suscriptions.
+The main reason to select this theme was to create a collaborative platform to ensure efficient working without the distraction of online projects and just cause I wanted to basically.
 
 ## How to use Constellate
 
-**PHASES: Lobby → Diverge → Cluster → Converge → Results/Export**.
+**PHASES:** Lobby → Diverge → Cluster → Converge → Results/Export.
 
-## 1. Create/Join a Room
+1. Create/Join a Room
 
-Create or Join a room through room id then enter a question to guide the brainstorming session
-You can share the room link with your anybody to join the same session
-
-The room host can guide the team through the brainstorming phases.
-
-## 2. Diverge
-
+2. Diverge
 In this phase, participants can contribute ideas to shared canvas.
-
 Create sticky notes to write your ideas.
-Move notes around the canvas and use zoom and pan to navigate the board.
-
 Authors are hidden during this phase so participants can focus on ideas rather than who suggested them.
 
-## 3. Cluster
-
-In this phase, once everyone has contributed ideas we can organize them.
-
+3. Cluster
 Group the notes into clusters with special name.
 Use connectors to show relationships between ideas.
 
-When zoomed out, clusters appear as summary bubbles, making larger boards easier to navigate.
-
-## 4. Converge
-
-In this phase, we vote on ideas and clusters they consider most valuable.
-
+4. Converge
 Review the notes and clusters on the board and use your available vote dots to support important ideas.
-Distribute your votes according to your priorities.
+Distribute votes according to priorities.
 Observe the voting indicators to see which ideas receive the most support.
 
-Ideas with stronger voting support receive greater visual emphasis, helping the team identify popular suggestions and shared priorities.
-
-## 5. Results
-
-After the Converge phase begins, we can open the Results page to get result.
-
-- Review the ranked ideas and clusters and see for the best one.
-
+5. Results
+Review the ranked ideas and clusters and see for the best one.
 We can use the export option to download the results as a Markdown (.md) file.
-The exported file can be saved, shared with teammates or used in meeting notes, project, documentation and future planning.
-
 
 ## Features
 
@@ -121,81 +93,42 @@ Folder contents may evolve as the project develops.
 ## How to Run Locally
 
 ### 1. Clone or download the repository
-
-```bash
 git clone https://github.com/Naynsi2012/Constellate.git
 cd Constellate
-```
 
-If you downloaded the source as a ZIP, extract it and open a terminal in the extracted project folder.
-
-### 2. Configure the backend environment
-
-```bash
+### 2. Configure the backend 
 cd Backend
 npm install
 cp .env.example .env
-```
 
-On Windows Command Prompt, use `copy .env.example .env` instead of `cp`.
+Open Backend/.env and update the values:
 
-Open `Backend/.env` and update the values if needed:
-
-```dotenv
-# Required
 FRONTEND_URL=http://localhost:5173
 PORT=3000
 NODE_ENV=development
-
-# Optional
 DATA_DIR=./data/rooms
 ROOM_TTL=3d
 ROOM_CLEANUP_INTERVAL=1h
-```
 
 ### 3. Start the backend
-
-Run this from the `Backend` directory:
-
-```bash
+Run this from the Backend directory:
 npm run dev
-```
 
-The backend will use the configured port, normally `http://localhost:3000`.
-
-### 4. Configure the frontend environment
-
+### 4. Configure the frontend
 Open a second terminal from the project root:
 
-```bash
 cd Frontend
 npm install
 cp .env.example .env
-```
-
-On Windows Command Prompt, use `copy .env.example .env`.
 
 The frontend `.env` should contain the backend API URL:
-
-```dotenv
 VITE_API_URL=http://localhost:3000
-```
 
 ### 5. Start the frontend
-
-Run this from the `Frontend` directory:
-
-```bash
+Run this from the Frontend directory:
 npm run dev
-```
 
-Vite will print the local URL. It is usually:
-
-```text
-http://localhost:5173
-```
-
-Keep both the backend and frontend terminals running while developing.
+Keep both the backend and frontend terminals running
 
 ## AI Usage
 
