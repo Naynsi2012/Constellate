@@ -13,7 +13,7 @@ app.use(express.json({ limit: "10kb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
-    origin: config.FRONTEND_URL,
+    origin: config.FRONTEND_URL || false,
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   }),
